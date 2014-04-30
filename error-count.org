@@ -1,0 +1,127 @@
+#+TITLE:Error Count 
+#+AUTHOR: Maik Schünemann
+#+email: maikschuenemann@gmail.com
+#+TAGS:  BlowerDoor(b) Suub(s) Uni(u) Home(h) Task(t) Note(n) Info(i)#+TAGS: Changed(c) Project(p) Reading(r) Hobby(f) OpenSource(o) Meta(m)#+SEQ_TODO: TODO(t) STARTED(s) WAITING(w) APPT(a) | DONE(d) CANCELLED(c) DEFERRED(f) NEXT(n)#+STARTUP:showall
+#+LaTeX_CLASS: uni
+-----
+* Introduction
+  This program solves the problem of extracting semantic ocr-failures
+  between a two texts, one that is the ground-truth and the other is
+  the performed result from the ocr.
+
+  The ocr-failure codes are given by the following matrix:
+  |   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+  | 1 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 | 6 |
+  | 2 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 |   |
+  | 3 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 |   |
+  | 4 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 | 6 |
+  | 5 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 |   |
+  | 6 |   |   |   |   |   |   |   |   |   |
+  | 7 |   |   |   |   |   |   |   |   |   |
+  | 8 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |   |   |
+  | 9 |   |   |   |   |   |   |   |   |   |
+
+  The codes are the following:
+  - 1 letter   
+  - 2 Punctuation 
+  - 3 digit 
+  - 4 special character 
+  - 5 whitespace 
+  - 6 part of character 
+  - 7 multiple characters 
+  - 8 missing character 
+  - 9 Case error 
+ 
+  The values in the matrix are the weights for the particular
+  ocr-error. The values shown here are examples, they can be changed
+  for particular situations.
+
+  The idea is to separate the semantic informations of the ocr-errors
+  from just the sum of error points that determines the quality of the
+  ocr.
+
+
+  The task of the program is to extract the correct error-codes and
+  their locations from theground-truth and ocr-results texts.
+
+* Setting up
+  #+begin_src clojure :tangle src/new_error_count/core
+    (ns new-error-count.core
+      (:require [clojure.java.io :refer [file]])
+      (:use [clojure.core.matrix]))
+    
+    (set! *warn-on-reflection* true)
+  #+end_src 
+
+  #+RESULTS:
+  : true
+
+  #+begin_src clojure :tangle test/new_error_codes/test_core.clj
+    (ns error-count.core-test
+      (:require [clojure.test :refer :all]
+                [new-error-count.core :refer :all]
+                [clojure.core.matrix :refer :all]))
+  #+end_src 
+
+  #+RESULTS:
+  : nil
+
+* Calculating the edit distance
+  Before we can see what errors were performed by the ocr we need a
+  correspondence between the characters in the ground truths text and
+  the characters in the ocr-results text.
+  If the ocr would miss a character all further characters would also
+  be misaligned. 
+  Therefore we need informations about the /changes/ between
+  ground-truths and ocr-results when they are maximally aligned.
+  
+  To get this, we can use the [[http://en.wikipedia.org/wiki/Levenshtein_distance][levenshtein distance]], which is defined
+  as the minimum number of single-character edits (i.e. insertions,
+  deletions or substitutions) required to change one word into the
+  other.
+  
+  The levenshtein distance is computed by the standard dynamic
+  programming algorithm:
+  #+begin_src clojure :tangle src/new_error_count/core.clj
+    (defn lev [str1 str2]
+       (let [mat (new-matrix :ndarray (inc (count str1)) (inc (count str2)))]
+         (prn "start lev")
+         (mset! mat 0 0 0)
+         (dotimes [i (count str1)]
+           (mset! mat (inc i) 0 (inc i)))
+         (dotimes [j (count str2)]
+           (mset! mat 0 (inc j) (inc j)))
+         (dotimes [dj (count str2)]
+           (dotimes [di (count str1)]
+             (let [j (inc dj) i (inc di)]
+               (mset! mat i j
+                      (cond
+                       (= (.charAt ^String str1 di) (.charAt ^String str2 dj))
+                       (mget mat di dj)
+                       :else
+                       (min (inc (mget mat di j)) (inc (mget mat i dj))
+                            (inc (mget mat di dj))))))))
+         mat))
+  #+end_src 
+  
+  This fills a 2-dimensional array of shape $[u+1,v+1], u =
+  length(gt), v = length(or)$
+  The levenshtein-distance is in the field [(count gt) (count or)] of
+  the created matrix.
+
+  #+begin_src clojure :tangle test/new_error_count/test_core.clj 
+    (defn distance [a b]
+      (let [m (lev a b)]
+        (mget m (count a) (count b))))
+    
+    (deftest test-lev
+      (is (= 1 (distance "" "a")))
+      (is (= 1 (distance "a" "")))
+      (is (= 3 (distance "kitten" "sitting"))))
+  #+end_src 
+
+
+  #+RESULTS:
+  : #'error-count.core-test/test-lev
+
+* TODO Sessions for namespace issue?
