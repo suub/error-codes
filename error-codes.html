@@ -1,0 +1,1041 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<title>Error Codes</title>
+<!-- 2014-05-01 Do 23:06 -->
+<meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta  name="generator" content="Org-mode" />
+<meta  name="author" content="Maik Schünemann" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { color: green; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: visible;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline;}
+  pre.src-sh:before    { content: 'sh'; }
+  pre.src-bash:before  { content: 'sh'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-R:before     { content: 'R'; }
+  pre.src-perl:before  { content: 'Perl'; }
+  pre.src-java:before  { content: 'Java'; }
+  pre.src-sql:before   { content: 'SQL'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.right  { text-align: center;  }
+  th.left   { text-align: center;   }
+  th.center { text-align: center; }
+  td.right  { text-align: right;  }
+  td.left   { text-align: left;   }
+  td.center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara:nth-child(2) { display: inline; }
+  .footpara { display: block; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  /*]]>*/-->
+</style>
+<script type="text/javascript">
+/*
+@licstart  The following is the entire license notice for the
+JavaScript code in this tag.
+
+Copyright (C) 2012-2013 Free Software Foundation, Inc.
+
+The JavaScript code in this tag is free software: you can
+redistribute it and/or modify it under the terms of the GNU
+General Public License (GNU GPL) as published by the Free Software
+Foundation, either version 3 of the License, or (at your option)
+any later version.  The code is distributed WITHOUT ANY WARRANTY;
+without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
+
+As additional permission under GNU GPL version 3 section 7, you
+may distribute non-source (e.g., minimized or compacted) forms of
+that code without the copy of the GNU GPL normally required by
+section 4, provided you include this license notice and a URL
+through which recipients can access the Corresponding Source.
+
+
+@licend  The above is the entire license notice
+for the JavaScript code in this tag.
+*/
+<!--/*--><![CDATA[/*><!--*/
+ function CodeHighlightOn(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(null != target) {
+     elem.cacheClassElem = elem.className;
+     elem.cacheClassTarget = target.className;
+     target.className = "code-highlighted";
+     elem.className   = "code-highlighted";
+   }
+ }
+ function CodeHighlightOff(elem, id)
+ {
+   var target = document.getElementById(id);
+   if(elem.cacheClassElem)
+     elem.className = elem.cacheClassElem;
+   if(elem.cacheClassTarget)
+     target.className = elem.cacheClassTarget;
+ }
+/*]]>*///-->
+</script>
+<script type="text/javascript" src="http://orgmode.org/mathjax/MathJax.js"></script>
+<script type="text/javascript">
+<!--/*--><![CDATA[/*><!--*/
+    MathJax.Hub.Config({
+        // Only one of the two following lines, depending on user settings
+        // First allows browser-native MathML display, second forces HTML/CSS
+        //  config: ["MMLorHTML.js"], jax: ["input/TeX"],
+            jax: ["input/TeX", "output/HTML-CSS"],
+        extensions: ["tex2jax.js","TeX/AMSmath.js","TeX/AMSsymbols.js",
+                     "TeX/noUndefined.js"],
+        tex2jax: {
+            inlineMath: [ ["\\(","\\)"] ],
+            displayMath: [ ['$$','$$'], ["\\[","\\]"], ["\\begin{displaymath}","\\end{displaymath}"] ],
+            skipTags: ["script","noscript","style","textarea","pre","code"],
+            ignoreClass: "tex2jax_ignore",
+            processEscapes: false,
+            processEnvironments: true,
+            preview: "TeX"
+        },
+        showProcessingMessages: true,
+        displayAlign: "center",
+        displayIndent: "2em",
+
+        "HTML-CSS": {
+             scale: 100,
+             availableFonts: ["STIX","TeX"],
+             preferredFont: "TeX",
+             webFont: "TeX",
+             imageFont: "TeX",
+             showMathMenu: true,
+        },
+        MMLorHTML: {
+             prefer: {
+                 MSIE:    "MML",
+                 Firefox: "MML",
+                 Opera:   "HTML",
+                 other:   "HTML"
+             }
+        }
+    });
+/*]]>*///-->
+</script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Error Codes</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#sec-1">1. Introduction</a></li>
+<li><a href="#sec-2">2. Setting up</a></li>
+<li><a href="#sec-3">3. Getting the edits between the texts</a>
+<ul>
+<li><a href="#sec-3-1">3.1. Calculating the edit distance</a></li>
+<li><a href="#sec-3-2">3.2. Backtracking the edits from the levenshtein matrix</a></li>
+<li><a href="#sec-3-3">3.3. Calculating the edits</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Getting the error codes from the edit distance</a>
+<ul>
+<li><a href="#sec-4-1">4.1. Extracting basic error-codes</a></li>
+<li><a href="#sec-4-2">4.2. Extracting many-to-one and one-to-many errors</a>
+<ul>
+<li><a href="#sec-4-2-1">4.2.1. Recognizing these errors</a></li>
+</ul>
+</li>
+<li><a href="#sec-4-3">4.3. Setting up the extraction list</a></li>
+</ul>
+</li>
+<li><a href="#sec-5">5. Testing the error-codes</a></li>
+<li><a href="#sec-6">6. Helpers for deployment to ocr-visualizer</a></li>
+<li><a href="#sec-7">7. Todos</a>
+<ul>
+<li><a href="#sec-7-1">7.1. <span class="todo TODO">TODO</span> determine right error codes for many-to-one errors</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<hr  />
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Introduction</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+This program solves the problem of extracting semantic ocr-failures
+between a two texts, one that is the ground-truth and the other is
+the performed result from the ocr.
+</p>
+
+<p>
+The ocr-failure codes are given by the following matrix:
+</p>
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+
+<col  class="right" />
+</colgroup>
+<tbody>
+<tr>
+<td class="right">&#xa0;</td>
+<td class="right">1</td>
+<td class="right">2</td>
+<td class="right">3</td>
+<td class="right">4</td>
+<td class="right">5</td>
+<td class="right">6</td>
+<td class="right">7</td>
+<td class="right">8</td>
+<td class="right">9</td>
+</tr>
+
+<tr>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">7</td>
+<td class="right">2</td>
+<td class="right">5</td>
+<td class="right">6</td>
+</tr>
+
+<tr>
+<td class="right">2</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">7</td>
+<td class="right">2</td>
+<td class="right">5</td>
+<td class="right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="right">3</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">7</td>
+<td class="right">2</td>
+<td class="right">5</td>
+<td class="right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="right">4</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">7</td>
+<td class="right">2</td>
+<td class="right">5</td>
+<td class="right">6</td>
+</tr>
+
+<tr>
+<td class="right">5</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">1</td>
+<td class="right">7</td>
+<td class="right">2</td>
+<td class="right">5</td>
+<td class="right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="right">6</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="right">7</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="right">8</td>
+<td class="right">4</td>
+<td class="right">4</td>
+<td class="right">4</td>
+<td class="right">4</td>
+<td class="right">4</td>
+<td class="right">4</td>
+<td class="right">4</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="right">9</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+<td class="right">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+The codes are the following:
+</p>
+<ul class="org-ul">
+<li>1 letter   
+</li>
+<li>2 Punctuation 
+</li>
+<li>3 digit 
+</li>
+<li>4 special character 
+</li>
+<li>5 whitespace 
+</li>
+<li>6 part of character 
+</li>
+<li>7 multiple characters 
+</li>
+<li>8 missing character 
+</li>
+<li>9 Case error 
+</li>
+</ul>
+
+<p>
+The values in the matrix are the weights for the particular
+ocr-error. The values shown here are examples, they can be changed
+for particular situations.
+</p>
+
+<p>
+The idea is to separate the semantic informations of the ocr-errors
+from just the sum of error points that determines the quality of the
+ocr.
+</p>
+
+
+<p>
+The task of the program is to extract the correct error-codes and
+their locations from theground-truth and ocr-results texts.
+</p>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Setting up</h2>
+<div class="outline-text-2" id="text-2">
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #b0c4de;">ns</span> error-codes.core
+  (<span style="color: #7fffd4;">:require</span> [clojure.java.io <span style="color: #7fffd4;">:refer</span> [file]])
+  (<span style="color: #7fffd4;">:use</span> [clojure.core.matrix]))
+
+(set! *warn-on-reflection* true)
+</pre>
+</div>
+
+<pre class="example">
+true
+</pre>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #b0c4de;">ns</span> error-codes.test-core
+  (<span style="color: #7fffd4;">:require</span> [clojure.test <span style="color: #7fffd4;">:refer</span> <span style="color: #7fffd4;">:all</span>]
+            [error-codes.core <span style="color: #7fffd4;">:refer</span> <span style="color: #7fffd4;">:all</span>]
+            [clojure.core.matrix <span style="color: #7fffd4;">:refer</span> <span style="color: #7fffd4;">:all</span>]))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> Getting the edits between the texts</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Calculating the edit distance</h3>
+<div class="outline-text-3" id="text-3-1">
+<p>
+Before we can see what errors were performed by the ocr we need a
+correspondence between the characters in the ground truths text and
+the characters in the ocr-results text.
+If the ocr would miss a character all further characters would also
+be misaligned. 
+Therefore we need informations about the <i>changes</i> between
+ground-truths and ocr-results when they are maximally aligned.
+</p>
+
+<p>
+To get this, we can use the <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">levenshtein distance</a>, which is defined
+as the minimum number of single-character edits (i.e. insertions,
+deletions or substitutions) required to change one word into the
+other.
+</p>
+
+<p>
+The levenshtein distance is computed by the standard dynamic
+programming algorithm:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">lev</span> [str1 str2]
+  (<span style="color: #b0c4de;">let</span> [mat (new-matrix <span style="color: #7fffd4;">:ndarray</span> (<span style="color: #eedd82;">inc</span> (<span style="color: #eedd82;">count</span> str1)) (<span style="color: #eedd82;">inc</span> (<span style="color: #eedd82;">count</span> str2)))]
+     (mset! mat 0 0 0)
+     (<span style="color: #b0c4de;">dotimes</span> [i (<span style="color: #eedd82;">count</span> str1)]
+       (mset! mat (<span style="color: #eedd82;">inc</span> i) 0 (<span style="color: #eedd82;">inc</span> i)))
+     (<span style="color: #b0c4de;">dotimes</span> [j (<span style="color: #eedd82;">count</span> str2)]
+       (mset! mat 0 (<span style="color: #eedd82;">inc</span> j) (<span style="color: #eedd82;">inc</span> j)))
+     (<span style="color: #b0c4de;">dotimes</span> [dj (<span style="color: #eedd82;">count</span> str2)]
+       (<span style="color: #b0c4de;">dotimes</span> [di (<span style="color: #eedd82;">count</span> str1)]
+         (<span style="color: #b0c4de;">let</span> [j (<span style="color: #eedd82;">inc</span> dj) i (<span style="color: #eedd82;">inc</span> di)]
+           (mset! mat i j
+                  (<span style="color: #b0c4de;">cond</span>
+                   (<span style="color: #eedd82;">=</span> (<span style="color: #b0c4de;">.charAt</span> <span style="color: #b0c4de;">^String</span> str1 di) (<span style="color: #b0c4de;">.charAt</span> <span style="color: #b0c4de;">^String</span> str2 dj))
+                   (mget mat di dj)
+                   <span style="color: #7fffd4;">:else</span>
+                   (<span style="color: #eedd82;">min</span> (<span style="color: #eedd82;">inc</span> (mget mat di j)) (<span style="color: #eedd82;">inc</span> (mget mat i dj))
+                        (<span style="color: #eedd82;">inc</span> (mget mat di dj))))))))
+     mat))
+</pre>
+</div>
+
+<p>
+This fills a 2-dimensional array which are filled with the
+levenshtein distances for substrings of the texts.The full 
+levenshtein-distance is in the field [(count gt) (count or)] of the
+created matrix.
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">lev-distance</span> [a b]
+   (<span style="color: #b0c4de;">let</span> [m (lev a b)]
+     (mget m (<span style="color: #eedd82;">count</span> a) (<span style="color: #eedd82;">count</span> b))))
+
+ (<span style="color: #00ffff;">deftest</span> <span style="color: #87cefa;">test-lev</span>
+   (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> 1 (lev-distance <span style="color: #ffa07a;">""</span> <span style="color: #ffa07a;">"a"</span>)))
+   (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> 1 (lev-distance <span style="color: #ffa07a;">"a"</span> <span style="color: #ffa07a;">""</span>)))
+   (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> 3 (lev-distance <span style="color: #ffa07a;">"kitten"</span> <span style="color: #ffa07a;">"sitting"</span>))))
+
+(test-lev)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Backtracking the edits from the levenshtein matrix</h3>
+<div class="outline-text-3" id="text-3-2">
+<p>
+We are not interested in the edit distance, but in the <b>edits</b> that
+were performed to calculate it! 
+One possibility would be to store not the current distance in the
+cells of the matrix but the edits so far in addition to the
+distance. However, this approach has proven too slow (manipulating
+maps instead of doubles while creating the levenshtein matrix).
+It is however possible, to <i>trace</i> back the patch on wich the full
+levenshtein distance was created from the created matrix. This is 
+described <a href="http://de.wikipedia.org/wiki/Levenshtein-Distanz">here</a>.
+The order of branches in the backtrace function is important!
+moving the check for substitutions to the front favours the way
+with substitutions about other ways with insertions and deletions
+which have the same error count
+</p>
+
+<p>
+The edits between the files are represented as a map with the keys 
+</p>
+<p>
+:insertions, :deletions, and :substitutions which have a sequence
+of pairs [a b] as values where a and b specify the position where
+the edit was performed in the ground-truth and the orc-results
+texts
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">backtrace</span> [d i j acc]
+  (<span style="color: #b0c4de;">cond</span>
+   (<span style="color: #b0c4de;">and</span> (<span style="color: #eedd82;">&gt;</span> i 0) (<span style="color: #eedd82;">=</span> (<span style="color: #eedd82;">inc</span> (mget d (<span style="color: #eedd82;">dec</span> i) j)) (mget d i j)))
+   (<span style="color: #b0c4de;">recur</span> d (<span style="color: #eedd82;">dec</span> i) j (<span style="color: #eedd82;">assoc</span> acc <span style="color: #7fffd4;">:deletions</span> (<span style="color: #eedd82;">cons</span> [(<span style="color: #eedd82;">dec</span> i) j] (<span style="color: #7fffd4;">:deletions</span> acc))))
+   (<span style="color: #b0c4de;">and</span> (<span style="color: #eedd82;">&gt;</span> j 0) (<span style="color: #eedd82;">=</span> (<span style="color: #eedd82;">inc</span> (mget d i (<span style="color: #eedd82;">dec</span> j))) (mget d i j)))
+   (<span style="color: #b0c4de;">recur</span> d i (<span style="color: #eedd82;">dec</span> j) (<span style="color: #eedd82;">assoc</span> acc <span style="color: #7fffd4;">:insertions</span> (<span style="color: #eedd82;">cons</span> [i (<span style="color: #eedd82;">dec</span> j)] (<span style="color: #7fffd4;">:insertions</span> acc))))
+   (<span style="color: #b0c4de;">and</span> (<span style="color: #eedd82;">&gt;</span> i 0) (<span style="color: #eedd82;">&gt;</span> j 0) (<span style="color: #eedd82;">=</span> (<span style="color: #eedd82;">inc</span> (mget d (<span style="color: #eedd82;">dec</span> i) (<span style="color: #eedd82;">dec</span> j))) (mget d i j)))
+   (<span style="color: #b0c4de;">recur</span> d (<span style="color: #eedd82;">dec</span> i) (<span style="color: #eedd82;">dec</span> j) (<span style="color: #eedd82;">assoc</span> acc <span style="color: #7fffd4;">:substitutions</span> (<span style="color: #eedd82;">cons</span> [(<span style="color: #eedd82;">dec</span> i) (<span style="color: #eedd82;">dec</span> j)] (<span style="color: #7fffd4;">:substitutions</span> acc))))
+   (<span style="color: #b0c4de;">and</span> (<span style="color: #eedd82;">&gt;</span> i 0) (<span style="color: #eedd82;">&gt;</span> j 0) (<span style="color: #eedd82;">=</span> (mget d (<span style="color: #eedd82;">dec</span> i) (<span style="color: #eedd82;">dec</span> j)) (mget d i j)))
+   (<span style="color: #b0c4de;">recur</span> d (<span style="color: #eedd82;">dec</span> i) (<span style="color: #eedd82;">dec</span> j) acc)
+   <span style="color: #7fffd4;">:else</span> acc))
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3-3" class="outline-3">
+<h3 id="sec-3-3"><span class="section-number-3">3.3</span> Calculating the edits</h3>
+<div class="outline-text-3" id="text-3-3">
+<p>
+With the lev and backtrace function, we can define the edits
+function which returns the edits map described above with the
+minimal edits between the two texts
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">edits</span> [a b]
+  (<span style="color: #b0c4de;">let</span> [d (lev a b)]
+    (backtrace d (<span style="color: #eedd82;">count</span> a) (<span style="color: #eedd82;">count</span> b) {<span style="color: #7fffd4;">:insertions</span> '() <span style="color: #7fffd4;">:deletions</span> '()
+                                      <span style="color: #7fffd4;">:substitutions</span> '()
+                                      <span style="color: #7fffd4;">:distance</span> (mget d (<span style="color: #eedd82;">count</span> a) (<span style="color: #eedd82;">count</span> b))})))
+</pre>
+</div>
+
+<p>
+A few examples:
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">deftest</span> <span style="color: #87cefa;">test-edits</span>
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"a"</span> <span style="color: #ffa07a;">"b"</span>) 
+         '{<span style="color: #7fffd4;">:insertions</span> (), <span style="color: #7fffd4;">:deletions</span> (), <span style="color: #7fffd4;">:substitutions</span> ([0 0]), <span style="color: #7fffd4;">:distance</span> 1}))
+  <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">swapping two characters is not multiple substitutions but insertion and deletions</span>
+  <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">which is more in line with what humans see there.</span>
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"ab"</span> <span style="color: #ffa07a;">"ba"</span>)
+         '{<span style="color: #7fffd4;">:insertions</span> ([0 0]), <span style="color: #7fffd4;">:deletions</span> ([1 2]), <span style="color: #7fffd4;">:substitutions</span> (), <span style="color: #7fffd4;">:distance</span> 2}))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"vr"</span> <span style="color: #ffa07a;">"io"</span>)
+         '{<span style="color: #7fffd4;">:insertions</span> (), <span style="color: #7fffd4;">:deletions</span> (), <span style="color: #7fffd4;">:substitutions</span> ([0 0] [1 1]), <span style="color: #7fffd4;">:distance</span> 2}))
+  <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">many to one errors are substitutions followed by insertions</span>
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"m"</span> <span style="color: #ffa07a;">"rn"</span>)
+         '{<span style="color: #7fffd4;">:insertions</span> ([1 1]), <span style="color: #7fffd4;">:deletions</span> (), <span style="color: #7fffd4;">:substitutions</span> ([0 0]), <span style="color: #7fffd4;">:distance</span> 2}))
+  <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">one to many errors are substitutions followed by deletions</span>
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"rn"</span> <span style="color: #ffa07a;">"m"</span>)
+         '{<span style="color: #7fffd4;">:insertions</span> (), <span style="color: #7fffd4;">:deletions</span> ([1 1]), <span style="color: #7fffd4;">:substitutions</span> ([0 0]), <span style="color: #7fffd4;">:distance</span> 2}))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"Kitten"</span> <span style="color: #ffa07a;">"sitting"</span>)
+         '{<span style="color: #7fffd4;">:insertions</span> ([6 6]), <span style="color: #7fffd4;">:deletions</span> (), <span style="color: #7fffd4;">:substitutions</span> ([0 0] [4 4]), <span style="color: #7fffd4;">:distance</span> 3}))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"Kitten"</span> <span style="color: #ffa07a;">"sittieng"</span>)
+         '{<span style="color: #7fffd4;">:insertions</span> ([4 4] [6 7]), <span style="color: #7fffd4;">:deletions</span> (), <span style="color: #7fffd4;">:substitutions</span> ([0 0]), <span style="color: #7fffd4;">:distance</span> 3}))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (edits <span style="color: #ffa07a;">"Kitten"</span> <span style="color: #ffa07a;">"iiittiing"</span>)
+         '{<span style="color: #7fffd4;">:insertions</span> ([2 2] [5 6] [6 8]), <span style="color: #7fffd4;">:deletions</span> (), <span style="color: #7fffd4;">:substitutions</span> ([0 0] [4 5]), <span style="color: #7fffd4;">:distance</span> 5}))
+  )
+
+
+(test-edits)
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Getting the error codes from the edit distance</h2>
+<div class="outline-text-2" id="text-4">
+<p>
+With the edits in place, the problem of the proper text alignment is
+solved. what is left to do is mapping the edits to the right error
+codes. Some codes (like [1 1]) which is a simple substitution (see
+table at the top) are trivial to extract from the edit distance.
+But what about the one-to-many errors (codes [x 7]) or the
+many-to-one errors (codes [7 x] or [x 6] the table is not
+deterministic here)
+</p>
+
+<p>
+Like test-edits showed above, one can recognise
+many-to-one/one-to-many errors by substitutions which are followed
+by insertions or deletions
+</p>
+
+<p>
+Therefore, they have to be extracted before the substitutions,
+deletions or insertions are extracted.
+</p>
+
+<p>
+A good architecture for the extracting operation is therefore to
+apply multiple extract <i>passes</i> to the edits to generate the
+error-codes. The extract phases can be defined as functions which 
+get the current edits map and the two texts as arguments and returns
+[new-edits extracted-error-codes].
+The extract phases can simply be stored in a vector which is
+traversed in the extraction phase
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #eedd82;">declare</span> extraction-list)
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">edits-to-error-codes</span>
+  ([edits t1 t2] (edits-to-error-codes edits t1 t2 extraction-list))
+  ([edits t1 t2 extraction-list]
+     (<span style="color: #b0c4de;">let</span> [{<span style="color: #7fffd4;">:keys</span> [substitutions deletions insertions]} edits]
+       (<span style="color: #b0c4de;">-&gt;</span> (<span style="color: #eedd82;">reduce</span> (<span style="color: #00ffff;">fn</span> [[codes edits] f]
+                     (<span style="color: #b0c4de;">let</span> [[ncodes nedits] (f edits t1 t2)]
+                       [(<span style="color: #eedd82;">concat</span> codes ncodes) nedits])) [[] edits] extraction-list)
+           first))))
+
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">error-codes</span>
+  [t1 t2]
+  (as-&gt; (edits t1 t2) x
+        (edits-to-error-codes x t1 t2)
+        <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">sort the codes so that the error-codes are ordered by position in text</span>
+        (<span style="color: #eedd82;">sort-by</span> (<span style="color: #eedd82;">comp</span> second second) x)))
+</pre>
+</div>
+
+
+<p>
+For the extraction phases we also need a small function which maps a
+character to its number in the matrix.
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">to-code-number</span> [<span style="color: #b0c4de;">^Character</span> c]
+  (<span style="color: #b0c4de;">cond</span>
+   (<span style="color: #b0c4de;">Character/isLetter</span> c) 1
+   (#{\. \, \? \!} c) 2
+   (<span style="color: #b0c4de;">Character/isDigit</span> c) 3
+   (<span style="color: #eedd82;">=</span> c \space) 5
+   <span style="color: #7fffd4;">:else</span> 4))
+</pre>
+</div>
+</div>
+
+
+<div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Extracting basic error-codes</h3>
+<div class="outline-text-3" id="text-4-1">
+<p>
+Extraction of the basic error codes for substitution, insertion and
+deletions are easy as they are just the insertions, substitutions
+and deletions in the edits map along with the right error
+code. This extraction functions will be at the bottom of the
+extraction-list
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">extract-substitution-errors</span> [edits t1 t2]
+  (<span style="color: #b0c4de;">let</span> [codes (<span style="color: #b0c4de;">for</span> [[p1 p2] (<span style="color: #7fffd4;">:substitutions</span> edits)]
+                (<span style="color: #b0c4de;">let</span> [c1 (<span style="color: #eedd82;">nth</span> t1 p1) c2 (<span style="color: #eedd82;">nth</span> t2 p2)
+                      [f1 f2] (<span style="color: #eedd82;">map</span> to-code-number [c1 c2])]
+                  [[f1 f2] [p1 p2]]))]
+    [codes (<span style="color: #eedd82;">assoc</span> edits <span style="color: #7fffd4;">:substitutions</span> [])]))
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">extract-insertion-errors</span> [edits t1 t2]
+  (<span style="color: #b0c4de;">let</span> [codes (<span style="color: #b0c4de;">for</span> [[p1 p2] (<span style="color: #7fffd4;">:insertions</span> edits)]
+                (<span style="color: #b0c4de;">let</span> [ c2 (<span style="color: #eedd82;">nth</span> t2 p2)
+                      f2 (to-code-number c2)]
+                  [[8 f2] [p1 p2]]))]
+    [codes (<span style="color: #eedd82;">assoc</span> edits <span style="color: #7fffd4;">:insertions</span> [])]))
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">extract-deletion-errors</span> [edits t1 t2]
+  (<span style="color: #b0c4de;">let</span> [codes (<span style="color: #b0c4de;">for</span> [[p1 p2] (<span style="color: #7fffd4;">:deletions</span> edits)]
+                (<span style="color: #b0c4de;">let</span> [c1 (<span style="color: #eedd82;">nth</span> t1 p1) 
+                      f1 (to-code-number c1)]
+                  [[f1 8] [p1 p2]]))]
+    [codes (<span style="color: #eedd82;">assoc</span> edits <span style="color: #7fffd4;">:deletions</span> [])]))
+</pre>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Extracting many-to-one and one-to-many errors</h3>
+<div class="outline-text-3" id="text-4-2">
+<p>
+Now comes the difficult path. Recognizing the semantic errors which
+are not just basic edits.
+</p>
+</div>
+<div id="outline-container-sec-4-2-1" class="outline-4">
+<h4 id="sec-4-2-1"><span class="section-number-4">4.2.1</span> Recognizing these errors</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<div class="org-src-container">
+
+<pre class="src src-clojure">(edits <span style="color: #ffa07a;">"mann"</span> <span style="color: #ffa07a;">"rnann"</span>)
+</pre>
+</div>
+
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(edits <span style="color: #ffa07a;">"rnann"</span> <span style="color: #ffa07a;">"mann"</span>)
+</pre>
+</div>
+
+<p>
+We see that many-to-one/one-to-many errors can be recognized by
+substitutions followed by insertions/deletions.
+However we don't want to consume all following
+insertions/deletions when there are to many. Consider this:
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(edits <span style="color: #ffa07a;">"Oma"</span> <span style="color: #ffa07a;">"Ornrew&#246;lkra"</span>)
+</pre>
+</div>
+
+<p>
+If we would just extract all following insertions here this
+wouldn't resemble well an <i>ocr-error</i>. Instead we only want to
+consume here the first two insertions for the letters r and n.
+The same is true for many-to-one errors.
+</p>
+
+<p>
+To generalise this observation, we do a <i>bar-analysis</i>:
+for one-to-many errors, OCR-engines do mistakes at the level of
+splitting the image into characters. So the width of the right
+character (example \m) and the recognised characters (example "rn"
+or "iii") will be roughly the same. We can therefore count the
+horizontal <i>bars</i> of the recognised characters and stop when their
+bar-count matches the bar-count of the original character.
+</p>
+
+<p>
+We map each character to its number of bars
+(we are dealing with text written in <a href="http://en.wikipedia.org/wiki/Fraktur">Fraktur</a>):
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">def</span> <span style="color: #87cefa;">bar-map</span>
+  {\A 2 \a 2 \B 2 \b 2 \C 2 \c 1 \D 2 \d 2 \E 2 \e 1 \F 2 \f 1 \G 3 \g 2
+   \H 2 \h 2 \I 2 \J 2 \i 1 \j 1 \K 2 \k 1 \L 2 \l 1 \M 4 \m 3 \N 3 \n 2
+   \O 2 \o 2 \P 3 \p 2 \Q 2 \q 2 \R 3 \r 1 \S 2 \s 2 \T 2 \t 1 \U 2 \u 2
+   \V 3 \v 2 \W 4 \w 3 \X 2 \x 1 \Y 3 \y 2 \Z 2 \z 1 \&#252; 2})
+
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">lookup-bar</span> [char]
+  (<span style="color: #eedd82;">get</span> bar-map char 1))
+</pre>
+</div>
+
+
+<p>
+It can also be that there are multiple one-to-many errors
+following each other. In the edits, this is shown as
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(edits <span style="color: #ffa07a;">"Mammut"</span> <span style="color: #ffa07a;">"Marniiiut"</span>)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(edits <span style="color: #ffa07a;">"Marniiiut"</span> <span style="color: #ffa07a;">"Mammut"</span>)
+</pre>
+</div>
+
+
+<p>
+So we also have to check for multiple substitutions followed by
+inertions/deletions and then map each character in the
+substitutions to the following characters according to the
+bar-analysis.
+</p>
+
+<p>
+The handling of many-to-one errors is basically the same, the
+differences are how to determine which insertions/deletion follows
+the given and how to label the extracted codes
+</p>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">extract-following-substitutions</span> [substitutions]
+  (<span style="color: #b0c4de;">when</span> (<span style="color: #eedd82;">seq</span> substitutions)
+    (<span style="color: #eedd82;">reduce</span> (<span style="color: #00ffff;">fn</span> [l [a b]]
+              (<span style="color: #b0c4de;">if</span> (<span style="color: #eedd82;">=</span> (<span style="color: #eedd82;">map</span> inc (<span style="color: #eedd82;">last</span> (<span style="color: #eedd82;">last</span> l))) [a b])
+                <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">add to current group</span>
+                (<span style="color: #eedd82;">update-in</span> l [(<span style="color: #eedd82;">dec</span> (<span style="color: #eedd82;">count</span> l))] #(<span style="color: #eedd82;">conj</span> % [a b]))
+                <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">make a new group</span>
+                (<span style="color: #eedd82;">conj</span> l [[a b]])))
+            [[(<span style="color: #eedd82;">first</span> substitutions)]] (<span style="color: #eedd82;">rest</span> substitutions))))
+
+(<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">following</span> [[a b] insdel type]
+  (<span style="color: #b0c4de;">loop</span> [[ia ib] [(<span style="color: #eedd82;">inc</span> a) (<span style="color: #eedd82;">inc</span> b)] acc []]
+    (<span style="color: #b0c4de;">if</span> (<span style="color: #eedd82;">some</span> #{[ia ib]} insdel)
+      (<span style="color: #b0c4de;">recur</span> (<span style="color: #b0c4de;">case</span> type
+               <span style="color: #7fffd4;">:one-to-many</span> [ia (<span style="color: #eedd82;">inc</span> ib)]
+               <span style="color: #7fffd4;">:many-to-one</span> [(<span style="color: #eedd82;">inc</span> ia) ib]) (<span style="color: #eedd82;">conj</span> acc [ia ib]))
+      acc)))
+
+(<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">add-following</span> [following-substitutions insdel type]
+  (<span style="color: #b0c4de;">for</span> [fs following-substitutions
+        <span style="color: #7fffd4;">:let</span> [if (following (<span style="color: #eedd82;">last</span> fs) insdel type)]
+        <span style="color: #7fffd4;">:when</span> (<span style="color: #eedd82;">seq</span> if)]
+    [fs (<span style="color: #eedd82;">concat</span> fs if)]))
+
+
+(<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">take-bars</span> [t1 t2 [a b] insdel type]
+  (<span style="color: #b0c4de;">let</span> [res (<span style="color: #b0c4de;">let</span> [bar-count (lookup-bar (<span style="color: #b0c4de;">case</span> type
+                                <span style="color: #7fffd4;">:one-to-many</span> (<span style="color: #eedd82;">nth</span> t1 a)
+                                <span style="color: #7fffd4;">:many-to-one</span> (<span style="color: #eedd82;">nth</span> t2 b)))
+                  _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"bar-count "</span> bar-count (<span style="color: #eedd82;">nth</span> t1 a))]
+    (<span style="color: #b0c4de;">loop</span> [[[ia ib] &amp; is] insdel acc 0 ret []]
+      (<span style="color: #b0c4de;">if</span> ia
+        (<span style="color: #b0c4de;">let</span> [bc (lookup-bar (<span style="color: #b0c4de;">case</span> type
+                               <span style="color: #7fffd4;">:one-to-many</span> (<span style="color: #eedd82;">nth</span> t2 ib)
+                               <span style="color: #7fffd4;">:many-to-one</span> (<span style="color: #eedd82;">nth</span> t1 ia)))
+              _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"bc "</span> bc)]
+          (<span style="color: #b0c4de;">if</span> (<span style="color: #eedd82;">&gt;=</span> (<span style="color: #eedd82;">+</span> acc bc) bar-count)
+            (<span style="color: #eedd82;">conj</span> ret [ia ib])
+            (<span style="color: #b0c4de;">recur</span> is (<span style="color: #eedd82;">+</span> acc bc) (<span style="color: #eedd82;">conj</span> ret [ia ib]))))
+        ret)))]
+     (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"take-bars "</span> res)
+     res))
+
+(<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">extract</span> [t1 t2 fl type]
+  (<span style="color: #b0c4de;">for</span> [[fs insdel] fl]
+    (<span style="color: #b0c4de;">loop</span> [[[a b] &amp; ss] fs extr [] insdel insdel]
+      (<span style="color: #b0c4de;">if</span> a
+        (<span style="color: #b0c4de;">let</span> [ext (take-bars t1 t2 [a b] insdel type)]
+          (<span style="color: #b0c4de;">recur</span> ss (<span style="color: #eedd82;">conj</span> extr [[a b] ext]) (<span style="color: #eedd82;">drop</span> (<span style="color: #eedd82;">count</span> ext) insdel)))
+        extr))))
+
+(<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">delete-from-edits</span> [edits to-delete]
+  (<span style="color: #eedd82;">into</span> {} (<span style="color: #b0c4de;">for</span> [[k v] (<span style="color: #eedd82;">dissoc</span> edits <span style="color: #7fffd4;">:distance</span>)] [k (<span style="color: #eedd82;">remove</span> (<span style="color: #eedd82;">set</span> to-delete) v)])))
+
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">extract-count-changing-errors</span> [type edits t1 t2]
+  (<span style="color: #b0c4de;">let</span> [{<span style="color: #7fffd4;">:keys</span> [substitutions insertions deletions]} edits
+        fs (extract-following-substitutions substitutions)
+        _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"fs "</span> fs)
+        fi (add-following fs (<span style="color: #b0c4de;">case</span> type <span style="color: #7fffd4;">:one-to-many</span> insertions <span style="color: #7fffd4;">:many-to-one</span> deletions) type)
+        _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"fi "</span> fi)
+        ext (<span style="color: #eedd82;">apply</span> concat (extract t1 t2 fi type))
+        _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"ext "</span> ext)
+        nedits (delete-from-edits edits (<span style="color: #eedd82;">partition</span> 2 (<span style="color: #eedd82;">flatten</span> ext)))
+        res
+        [(<span style="color: #b0c4de;">for</span> [[[a b] e] ext]
+           (<span style="color: #b0c4de;">case</span> (<span style="color: #eedd82;">count</span> e)
+             1 [[(to-code-number (<span style="color: #eedd82;">nth</span> t1 a)) (to-code-number (<span style="color: #eedd82;">nth</span> t2 b))] [a b]]
+             [(<span style="color: #b0c4de;">case</span> type
+                <span style="color: #7fffd4;">:one-to-many</span> [(to-code-number (<span style="color: #eedd82;">nth</span> t1 a)) 7]
+                <span style="color: #7fffd4;">:many-to-one</span> [7 (to-code-number (<span style="color: #eedd82;">nth</span> t2 b))]) [a b] (<span style="color: #eedd82;">last</span> e)])) nedits]
+        _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"ext "</span> ext <span style="color: #ffa07a;">"res"</span> (<span style="color: #eedd82;">first</span> res))]
+    res))
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-4-3" class="outline-3">
+<h3 id="sec-4-3"><span class="section-number-3">4.3</span> Setting up the extraction list</h3>
+<div class="outline-text-3" id="text-4-3">
+<p>
+Now the extraction list can be filled. First the one-to-many and
+many-to-one errors have to be processed. After that the basic
+substitution, insertion and deletion errors can be extracted
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">def</span> <span style="color: #87cefa;">extraction-list</span>
+  [(<span style="color: #eedd82;">partial</span> extract-count-changing-errors <span style="color: #7fffd4;">:one-to-many</span>)
+   (<span style="color: #eedd82;">partial</span> extract-count-changing-errors <span style="color: #7fffd4;">:many-to-one</span>)
+   extract-substitution-errors
+   extract-insertion-errors
+   extract-deletion-errors])
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-sec-5" class="outline-2">
+<h2 id="sec-5"><span class="section-number-2">5</span> Testing the error-codes</h2>
+<div class="outline-text-2" id="text-5">
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">deftest</span> <span style="color: #87cefa;">test-error-codes</span>
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (error-codes <span style="color: #ffa07a;">"a"</span> <span style="color: #ffa07a;">"b"</span>)
+         '([[1 1] [0 0]])))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (error-codes <span style="color: #ffa07a;">"kitten"</span> <span style="color: #ffa07a;">"sitting"</span>)
+         '([[1 1] [0 0]] [[1 1] [4 4]] [[8 1] [6 6]])))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (error-codes <span style="color: #ffa07a;">"m"</span> <span style="color: #ffa07a;">"rn"</span>)
+         '([[1 7] [0 0] [1 1]])))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (error-codes <span style="color: #ffa07a;">"Mammut"</span> <span style="color: #ffa07a;">"rnarniiiut"</span>)
+         '([[1 7] [0 0] [1 1]] [[1 7] [2 3] [3 4]] [[1 7] [3 4] [4 7]])))
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (error-codes <span style="color: #ffa07a;">"rnarniiiut"</span> <span style="color: #ffa07a;">"Mammut"</span>)
+         '([[7 1] [0 0] [1 1]] [[7 1] [3 2] [4 3]] [[7 1] [4 3] [7 4]]))))
+
+(test-error-codes)
+</pre>
+</div>
+
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #00ffff;">deftest</span> <span style="color: #87cefa;">big-error-codes-test</span>
+  (<span style="color: #98fb98;">is</span> (<span style="color: #eedd82;">=</span> (error-codes <span style="color: #ffa07a;">"78\n\nschneider, vom blo&#223;en Geldverdienst absehend, mit sch&#246;ner Beharrlichkeit dem Ziele\nnachstrebten, ein wirkliches Kunstwerk zu schaffen. Da&#223; ihnen dies bis zu einem\ngewissen Grade gelungen ist, leidet keinen Zweifel; jedenfalls ist die Federzeichnung,\nnach welcher der Holzschneider gearbeitet hat, in allen St&#252;cken getreu und correct,\nwird m&#246;chten sagen zu correct und getreu, wiedergegeben.\n\tDas Werk stellt eine Felsschlucht dar, in welcher eine L&#246;win ihren vor ihr\nhingestreckten, von einem Wurfspie&#223; durchbohrten Gemahl betrauert, w&#228;hrend oben\ndurch eine Oeffnung in der Steinwand Beduinenj&#228;ger sichtbar werden, die auch ihr\nLeben zu bedrohen scheinen. Die Gruppirung dieser Figuren ist gut, die Bewegung\nder L&#246;win ist - in der Conception - ebenfalls angemessen. Die J&#228;ger h&#228;tten\nf&#252;glich wegbleiben k&#246;nnen, da sie, wofern sie den auch der L&#246;win drohenden Tod\nandeuten sollen, die eigentliche Wirkung des Bildes der trauernden L&#246;win st&#246;ren;\nsollen sie aber sagen, da&#223; der L&#246;we durch J&#228;ger umgekommen ist, so sind sie &#252;ber-\nfl&#252;ssig, da die Ursache des Todes schon hinreichend durch den im Leibe des Thieres\nsteckenden abgebrochenen Spie&#223; angegeben ist.\n\tDas Bild w&#252;rde ferner an Wirkung gewonnen haben durch eine feinere Beob-\nachtung des Stofflichen. Das Fell der Thiere, Sandboden mit Halfehgras, Felswand,\nPalmen und Aloe sind in der technischen Behandlung jedenfalls zu gleichm&#228;&#223;ig. So\nh&#228;tte beispielsweise die Schattenseite der Felswand, rechts wo die J&#228;ger herablugen,\nruhiger und in zur&#252;ckweichenden T&#246;nen behandelt werden sollen. Der K&#246;rper des lie-\ngenden L&#246;wen h&#228;tte sich mehr rund von der Fl&#228;che abheben m&#252;ssen, wie auch die ganze\nMuskulatur der Thiere noch pr&#228;ciser und energischer sein k&#246;nnte. Endlich aber will\ndas Blut vor dem Maule des todten L&#246;wen uns nicht recht wie Blut erscheinen.\nTrotz dieser Ausstellungen an den Einzelnheiten verdient das Blatt als Ganzes -\nnamentlich als t&#252;chtiger gesunder Holzschnitt - den besten Leistungen der Gegen-\nwart auf diesem Gebiet beigerechnet zu werden, und in dieser Eigenschaft empfehlen\nwir es allen Freunden der Kunst angelegentlich.\n\nLiteratur.\n\n\tDie B&#246;hmischen Exulanten in Sachsen von Chr. A. Pescheck Leipzig,\nS. Hirzel 1857. - Es ist von mehrfachem Interesse zu ermitteln, wie die einzel-\nnen B&#246;lterst&#228;mme des gegenw&#228;rtigen Deutschlands durch die Ueberg&#228;nge der In-\ndividuen aus einem Stamme in den andern allm&#228;lig zu einer deutschen Nation\ngemischt worden sind. Das Ineinanderflie&#223;en der St&#228;mme durch Ein- und Aus-\nwanderung war w&#228;hrend fast zwei Jahrtausenden niemals ganz unterbrochen, hat\naber in verschiedenen Zeitr&#228;umen besondere Ausdehnung erreicht. Von der politischen\nGeschichte wird das massenhafte Einstr&#246;men der Deutschen in das Slavenland zwischen\nElbe und Weichsel noch am ausf&#252;hrlichsten behandelt. Aber nicht weniger eigenth&#252;mlich\nwaren die Verh&#228;ltnisse in B&#246;hmen. Seit dem fr&#252;hsten Mittelalter fand dorthin ein fried-\nliches Einziehen deutscher Bildung und deutscher Individuen statt. Doch die deutsche\nColonisation des Landes wurde mehr als einmal durch eine kr&#228;ftige Gegenstr&#246;mung\n"</span>
+
+
+    <span style="color: #ffa07a;">" \n\n \n\n  \n\n78\n\nschneidet, vom blo&#223;en Geldberdienst absehend, mit sch&#246;ner Beharrlichkeit dem Ziele\nnachstrebten, ein wirtliches Kunstiverk zu schaffen. Da&#223; ihnen dies bis zu einem\ngewissen Grade gelungen ist, leidet keinen Zweifel; jedenfalls ist die Federzeiehnung\nnach welcher der Holzschneidcr gearbeitet hat, in allen St&#252;cken getreu und eorrect,\nwird m&#246;chten sagen zu eorrect und getreu, niiedkkgegelbkk\n\nDas Werk stellt eine Felsschlucht dar, in welcher eine L&#246;win ihren vor ihr\nlniigestrecktenj von einein Wurfspie&#223; durchbohrter! Gemahl betrauert, w&#228;hrend oben\ndurch eine Oeffnung in der Steinwand Beduiiienj&#228;gssr sichtbar werden, die auch ihr\nLeben zu bedrohen scheinen. Die Gruppiruiig dieser Figuren ist gut, die Bewegung\nder L&#246;win ist &#8212;-- in der Conceptivii &#8212;-&#8212; ebenfalls angemessen. Die J&#228;ger h&#228;tten\nf&#252;glich wegbleiben k&#246;nnen, da sie, wofern sie den auch der L&#246;win drohenden Tod\nandeuten sollen, die eigentliche Wirkung des Bildes der trauernden L&#246;win st&#246;ren;\nsollen sie aber sagen, da&#223; der L&#246;we durch J&#228;ger umgekommen ist, so smd sie Liber-\nfl&#252;ssig, da die Ursache des Todes schon hinreichend durch den im Leibe des Thieres\nsteckenden abgebrochenen Spie&#223; angegeben ist.\n\nDas Bild wiirde ferner an Wirkung gewonnen haben durch eine feinere Beob-\nachtung des Stofflichen. Das Fell der Thiere, Sandboden mit Halfehgras Felswand,\nPalmen undAloe sind in der technischen Behandlung jedenfalls zu gleichni&#228;&#223;ig So\nh&#228;tte beispielsweise die Schattenseite der Felswand, rechts wo die J&#228;ger herablugen,\nruhiger und in zuriietkveichendeii T&#246;nen behandelt werden sollen. Der K&#246;rper des lie-\ngenden L&#246;wen h&#228;tte sich mehr rund von der Fl&#228;che abhebeii m&#252;ssen, wie auch die ganze\nMuskulatur derThiere noch pr&#228;ciser und energischer sein k&#246;nnte. Endlich aber will\ndas Blut vor den! Maule des todten L&#246;wen uns nicht recht wie Blut erscheinen.\nTrotz dieser Ansstellungen an den Einzelnhciten verdient das Blatt als Ganzes &#8212;-\nnamentlich als t&#252;chtiger gesunder Holzsehnitt &#8212; den besten Leistungen der Gegen-\n\n \n\nwart auf diescni Gebiet beigereehnet zu werden, und in dieser Eigenschaft empfehlen.\n\nwir es allen Freunden der Kunst angelegentlichJ &#171;\n\nLiteratur.\n\nDie B&#246;hmischen Exulanten in Sachsen von Chr. A. Pescheclc Leipzig- &#171;\n\nS. Hirzel 1857. &#8212;- Es ist von mehrfacheni Interesse zu ermitteln, wie die einzel-\nnen B&#246;lterst&#228;nune des gegenw&#228;rtigen Deutschlands durch die Ueberg&#228;iige der IN-\ndividuen aus einem Stamme in den andern allm&#228;lig zu einer deutschen Nation\ngemischt worden sind Das Ineinanderflie&#223;en der St&#228;mme durch Em- und Aus-\nwanderung war w&#228;hrend fast zwei Jahrtausenden niemals ganz unterbrochen, hat\naber in verschiedenen Zeitriiumen besondere Ausdehnung erreicht. Von der politischen\nGeschichte wird das massenhafteEinstr&#246;iiieii der Deutschen in das Slavenland zwischen\nElbe Und Weichsel noch am ausf&#252;hrlichsteii behandelt. Aber nicht weniger eigenthiinilich\nwaren die Verh&#228;ltnisse in B&#246;hmen. Seit dem friihsten Neittelalter fand dorthin ein fried-\nliches Einziehen deutscher Bildung und deutscher Individuen statt. Doch die dcutsche\nColonisation des Landes wurde niehr als einmal durch eine triistige lihegeiistr&#246;mung\n\n  \n\n"</span>)
+         '([[8 5] [0 0]] [[8 4] [0 1]] [[8 4] [0 2]] [[8 5] [0 3]] [[8 4] [0 4]] [[8 4] [0 5]] [[8 5] [0 6]] [[8 5] [0 7]] [[8 4] [0 8]] [[8 4] [0 9]] [[1 1] [12 22]] [[1 1] [30 40]] [[1 1] [108 118]] [[1 7] [121 131] [122 132]] [[1 1] [246 257]] [[2 8] [252 263]] [[1 1] [282 292]] [[1 1] [329 339]] [[1 1] [360 370]] [[1 1] [380 390]] [[8 1] [382 392]] [[1 1] [384 395]] [[1 1] [385 396]] [[8 1] [390 401]] [[1 1] [391 403]] [[1 1] [392 404]] [[2 4] [393 405]] [[4 8] [395 407]] [[1 7] [471 482] [472 483]] [[1 1] [473 485]] [[2 1] [485 497]] [[1 7] [495 507] [496 508]] [[1 7] [518 531] [519 532]] [[1 7] [593 607] [594 608]] [[1 1] [599 614]] [[8 1] [600 615]] [[1 7] [672 688] [673 689]] [[8 4] [726 743]] [[8 4] [727 745]] [[1 1] [743 762]] [[1 7] [744 763] [745 764]] [[8 4] [746 766]] [[8 4] [747 768]] [[7 1] [1015 1037] [1016 1038]] [[1 1] [1023 1044]] [[8 1] [1024 1045]] [[4 4] [1158 1180]] [[1 1] [1169 1191]] [[8 1] [1170 1192]] [[2 8] [1302 1325]] [[5 8] [1324 1346]] [[1 7] [1385 1406] [1386 1407]] [[2 8] [1390 1412]] [[1 1] [1498 1519]] [[1 1] [1499 1520]] [[8 1] [1500 1521]] [[8 1] [1500 1522]] [[1 1] [1501 1524]] [[1 7] [1510 1533] [1511 1534]] [[1 7] [1618 1642] [1619 1643]] [[5 8] [1661 1686]] [[1 7] [1745 1769] [1746 1770]] [[1 1] [1821 1846]] [[1 1] [1849 1874]] [[8 4] [1885 1910]] [[1 1] [1926 1952]] [[4 4] [1933 1959]] [[8 4] [1968 1994]] [[8 5] [1968 1995]] [[8 4] [1968 1996]] [[8 4] [1968 1997]] [[1 1] [1981 2011]] [[1 7] [1982 2012] [1983 2013]] [[1 1] [1998 2029]] [[8 2] [2050 2081]] [[8 4] [2051 2083]] [[2 1] [2097 2130]] [[8 5] [2098 2131]] [[8 4] [2098 2132]] [[4 8] [2112 2147]] [[1 1] [2168 2202]] [[8 1] [2169 2203]] [[2 4] [2177 2212]] [[8 5] [2178 2213]] [[8 4] [2178 2214]] [[8 4] [2179 2216]] [[8 4] [2195 2233]] [[1 7] [2217 2256] [2218 2257]] [[1 7] [2272 2312] [2273 2313]] [[1 1] [2273 2313]] [[1 7] [2324 2365] [2325 2366]] [[1 1] [2333 2375]] [[2 8] [2431 2473]] [[7 1] [2473 2514] [2474 2515]] [[1 1] [2590 2630]] [[8 1] [2591 2631]] [[5 8] [2678 2719]] [[1 7] [2686 2726] [2687 2728]] [[1 7] [2688 2730] [2689 2731]] [[1 1] [2736 2779]] [[1 7] [2771 2814] [2772 2815]] [[1 1] [2810 2854]] [[1 7] [2811 2855] [2812 2856]] [[8 1] [2812 2857]] [[1 1] [2862 2908]] [[8 1] [2863 2909]] [[1 7] [2869 2916] [2870 2917]] [[1 1] [2982 3030]] [[1 7] [3020 3068] [3021 3069]] [[1 1] [3047 3096]] [[1 1] [3049 3098]] [[1 1] [3050 3099]] [[8 1] [3051 3100]] [[1 7] [3056 3106] [3057 3108]] [[1 7] [3060 3112] [3061 3113]] [[8 4] [3070 3123]] [[8 5] [3070 3124]] [[8 5] [3070 3125]] [[8 4] [3070 3126]] [[8 4] [3070 3127]]))))
+
+(big-error-codes-test)
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-6" class="outline-2">
+<h2 id="sec-6"><span class="section-number-2">6</span> Helpers for deployment to ocr-visualizer</h2>
+<div class="outline-text-2" id="text-6">
+<p>
+doesn't belong to the code - ignore
+</p>
+<div class="org-src-container">
+
+<pre class="src src-clojure">(<span style="color: #eedd82;">use</span> 'clojure.java.io)
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">get-files-sorted</span> [dir]
+  (<span style="color: #b0c4de;">-&gt;&gt;</span> (<span style="color: #eedd82;">file-seq</span> (file dir))
+       rest
+       (<span style="color: #eedd82;">sort-by</span> #(<span style="color: #b0c4de;">.getName</span>  %))))
+#_(file-locations for now... <span style="color: #ffa07a;">"/home/kima/programming/ocr-visualizer/resources/public/ground-truth/"</span> <span style="color: #ffa07a;">"/home/kima/programming/ocr-visualizer/resources/public/edits,"</span> <span style="color: #ffa07a;">"/home/kima/programming/ocr-visualizer/resources/public/ocr-results/"</span>)
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">deploy-error-codes</span> []
+  (<span style="color: #b0c4de;">let</span> [gts (get-files-sorted <span style="color: #ffa07a;">"/home/kima/programming/ocr-visualizer/resources/public/ground-truth/"</span>)
+        ocr-res (get-files-sorted <span style="color: #ffa07a;">"/home/kima/programming/ocr-visualizer/resources/public/ocr-results/"</span>)]
+    (<span style="color: #b0c4de;">doall</span> (<span style="color: #eedd82;">map</span> (<span style="color: #00ffff;">fn</span> [gt ocr]
+                   (<span style="color: #b0c4de;">let</span> [filename (<span style="color: #eedd82;">str</span> <span style="color: #ffa07a;">"/home/kima/programming/ocr-visualizer/resources/public/edits/"</span> (<span style="color: #b0c4de;">.getName</span> gt))]
+                     (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"error-counts for "</span> filename)
+                     (<span style="color: #eedd82;">spit</span> filename (<span style="color: #eedd82;">pr-str</span> (error-codes (<span style="color: #eedd82;">slurp</span> gt) (<span style="color: #eedd82;">slurp</span> ocr))))))
+                 gts ocr-res))))
+</pre>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+<div id="outline-container-sec-7" class="outline-2">
+<h2 id="sec-7"><span class="section-number-2">7</span> Todos</h2>
+<div class="outline-text-2" id="text-7">
+</div><div id="outline-container-sec-7-1" class="outline-3">
+<h3 id="sec-7-1"><span class="section-number-3">7.1</span> <span class="todo TODO">TODO</span> determine right error codes for many-to-one errors</h3>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<p class="author">Author: Maik Schünemann</p>
+<p class="date">Created: 2014-05-01 Do 23:06</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.2.6)</p>
+<p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
+</div>
+</body>
+</html>
