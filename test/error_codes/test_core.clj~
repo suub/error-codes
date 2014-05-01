@@ -1,0 +1,15 @@
+(ns error-codes.test-core
+  (:require [clojure.test :refer :all]
+            [error-codes.core :refer :all]
+            [clojure.core.matrix :refer :all]))
+
+(defn lev-distance [a b]
+   (let [m (lev a b)]
+     (mget m (count a) (count b))))
+ 
+ (deftest test-lev
+   (is (= 1 (lev-distance "" "a")))
+   (is (= 1 (lev-distance "a" "")))
+   (is (= 3 (lev-distance "kitten" "sitting"))))
+
+(test-lev)

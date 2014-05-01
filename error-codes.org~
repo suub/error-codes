@@ -1,4 +1,4 @@
-#+TITLE:Error Count 
+#+TITLE:Error Codes
 #+AUTHOR: Maik Schünemann
 #+email: maikschuenemann@gmail.com
 #+TAGS:  BlowerDoor(b) Suub(s) Uni(u) Home(h) Task(t) Note(n) Info(i)#+TAGS: Changed(c) Project(p) Reading(r) Hobby(f) OpenSource(o) Meta(m)#+SEQ_TODO: TODO(t) STARTED(s) WAITING(w) APPT(a) | DONE(d) CANCELLED(c) DEFERRED(f) NEXT(n)#+STARTUP:showall
@@ -45,8 +45,8 @@
   their locations from theground-truth and ocr-results texts.
 
 * Setting up
-  #+begin_src clojure :tangle src/new_error_count/core
-    (ns new-error-count.core
+  #+begin_src clojure :tangle src/error_codes/core.clj
+    (ns error-codes.core
       (:require [clojure.java.io :refer [file]])
       (:use [clojure.core.matrix]))
     
@@ -56,10 +56,12 @@
   #+RESULTS:
   : true
 
-  #+begin_src clojure :tangle test/new_error_codes/test_core.clj
-    (ns error-count.core-test
+  : true
+
+  #+begin_src clojure :tangle test/error_codes/test_core.clj 
+    (ns error-codes.test-core
       (:require [clojure.test :refer :all]
-                [new-error-count.core :refer :all]
+                [error-codes.core :refer :all]
                 [clojure.core.matrix :refer :all]))
   #+end_src 
 
@@ -82,9 +84,9 @@
   
   The levenshtein distance is computed by the standard dynamic
   programming algorithm:
-  #+begin_src clojure :tangle src/new_error_count/core.clj
+  #+begin_src clojure :tangle src/error_codes/core.clj :ns error-codes.core
     (defn lev [str1 str2]
-       (let [mat (new-matrix :ndarray (inc (count str1)) (inc (count str2)))]
+      (let [mat (new-matrix :ndarray (inc (count str1)) (inc (count str2)))]
          (prn "start lev")
          (mset! mat 0 0 0)
          (dotimes [i (count str1)]
@@ -102,26 +104,32 @@
                        (min (inc (mget mat di j)) (inc (mget mat i dj))
                             (inc (mget mat di dj))))))))
          mat))
+
+
   #+end_src 
-  
+
+  #+RESULTS:
+  : #'error-codes.core/lev
+
   This fills a 2-dimensional array of shape $[u+1,v+1], u =
   length(gt), v = length(or)$
   The levenshtein-distance is in the field [(count gt) (count or)] of
   the created matrix.
 
-  #+begin_src clojure :tangle test/new_error_count/test_core.clj 
-    (defn distance [a b]
-      (let [m (lev a b)]
-        (mget m (count a) (count b))))
+  #+begin_src clojure :tangle test/error_codes/test_core.clj :ns error-codes.test-core    
+    (defn lev-distance [a b]
+       (let [m (lev a b)]
+         (mget m (count a) (count b))))
+     
+     (deftest test-lev
+       (is (= 1 (lev-distance "" "a")))
+       (is (= 1 (lev-distance "a" "")))
+       (is (= 3 (lev-distance "kitten" "sitting"))))
     
-    (deftest test-lev
-      (is (= 1 (distance "" "a")))
-      (is (= 1 (distance "a" "")))
-      (is (= 3 (distance "kitten" "sitting"))))
+    (test-lev)
   #+end_src 
 
 
   #+RESULTS:
-  : #'error-count.core-test/test-lev
+  : nil
 
-* TODO Sessions for namespace issue?

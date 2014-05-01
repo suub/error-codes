@@ -1,0 +1,261 @@
+#+TITLE:Error Codes
+#+AUTHOR: Maik Schünemann
+#+email: maikschuenemann@gmail.com
+#+TAGS:  BlowerDoor(b) Suub(s) Uni(u) Home(h) Task(t) Note(n) Info(i)#+TAGS: Changed(c) Project(p) Reading(r) Hobby(f) OpenSource(o) Meta(m)#+SEQ_TODO: TODO(t) STARTED(s) WAITING(w) APPT(a) | DONE(d) CANCELLED(c) DEFERRED(f) NEXT(n)#+STARTUP:showall
+#+LaTeX_CLASS: uni
+-----
+* Introduction
+  This program solves the problem of extracting semantic ocr-failures
+  between a two texts, one that is the ground-truth and the other is
+  the performed result from the ocr.
+
+  The ocr-failure codes are given by the following matrix:
+  |   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
+  | 1 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 | 6 |
+  | 2 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 |   |
+  | 3 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 |   |
+  | 4 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 | 6 |
+  | 5 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 |   |
+  | 6 |   |   |   |   |   |   |   |   |   |
+  | 7 |   |   |   |   |   |   |   |   |   |
+  | 8 | 4 | 4 | 4 | 4 | 4 | 4 | 4 |   |   |
+  | 9 |   |   |   |   |   |   |   |   |   |
+
+  The codes are the following:
+  - 1 letter   
+  - 2 Punctuation 
+  - 3 digit 
+  - 4 special character 
+  - 5 whitespace 
+  - 6 part of character 
+  - 7 multiple characters 
+  - 8 missing character 
+  - 9 Case error 
+ 
+  The values in the matrix are the weights for the particular
+  ocr-error. The values shown here are examples, they can be changed
+  for particular situations.
+
+  The idea is to separate the semantic informations of the ocr-errors
+  from just the sum of error points that determines the quality of the
+  ocr.
+
+
+  The task of the program is to extract the correct error-codes and
+  their locations from theground-truth and ocr-results texts.
+
+* Setting up
+  #+begin_src clojure :tangle src/error_codes/core.clj
+    (ns error-codes.core
+      (:require [clojure.java.io :refer [file]])
+      (:use [clojure.core.matrix]))
+    
+    (set! *warn-on-reflection* true)
+  #+end_src 
+
+  #+RESULTS:
+  : true
+
+  : true
+
+  #+begin_src clojure :tangle test/error_codes/test_core.clj 
+    (ns error-codes.test-core
+      (:require [clojure.test :refer :all]
+                [error-codes.core :refer :all]
+                [clojure.core.matrix :refer :all]))
+  #+end_src 
+
+  #+RESULTS:
+  : nil
+* Getting the edits between the texts
+** Calculating the edit distance
+   Before we can see what errors were performed by the ocr we need a
+   correspondence between the characters in the ground truths text and
+   the characters in the ocr-results text.
+   If the ocr would miss a character all further characters would also
+   be misaligned. 
+   Therefore we need informations about the /changes/ between
+   ground-truths and ocr-results when they are maximally aligned.
+   
+   To get this, we can use the [[http://en.wikipedia.org/wiki/Levenshtein_distance][levenshtein distance]], which is defined
+   as the minimum number of single-character edits (i.e. insertions,
+   deletions or substitutions) required to change one word into the
+   other.
+   
+   The levenshtein distance is computed by the standard dynamic
+   programming algorithm:
+   #+begin_src clojure :tangle src/error_codes/core.clj :ns error-codes.core
+     (defn lev [str1 str2]
+       (let [mat (new-matrix :ndarray (inc (count str1)) (inc (count str2)))]
+          (mset! mat 0 0 0)
+          (dotimes [i (count str1)]
+            (mset! mat (inc i) 0 (inc i)))
+          (dotimes [j (count str2)]
+            (mset! mat 0 (inc j) (inc j)))
+          (dotimes [dj (count str2)]
+            (dotimes [di (count str1)]
+              (let [j (inc dj) i (inc di)]
+               	(mset! mat i j
+                       (cond
+                       	(= (.charAt ^String str1 di) (.charAt ^String str2 dj))
+                       	(mget mat di dj)
+                       	:else
+                       	(min (inc (mget mat di j)) (inc (mget mat i dj))
+                             (inc (mget mat di dj))))))))
+          mat))
+
+
+   #+end_src 
+
+   #+RESULTS:
+   : #'error-codes.core/lev
+
+   This fills a 2-dimensional array which are filled with the
+   levenshtein distances for substrings of the texts.The full 
+   levenshtein-distance is in the field [(count gt) (count or)] of the
+   created matrix.
+
+   #+begin_src clojure :tangle test/error_codes/test_core.clj :ns error-codes.test-core    
+     (defn lev-distance [a b]
+       	(let [m (lev a b)]
+          (mget m (count a) (count b))))
+      
+      (deftest test-lev
+       	(is (= 1 (lev-distance "" "a")))
+       	(is (= 1 (lev-distance "a" "")))
+       	(is (= 3 (lev-distance "kitten" "sitting"))))
+     
+     (test-lev)
+   #+end_src 
+   #+RESULTS:
+   : nil
+
+
+** Backtracking the edits from the levenshtein matrix
+   We are not interested in the edit distance, but in the *edits* that
+   were performed to calculate it! 
+   One possibility would be to store not the current distance in the
+   cells of the matrix but the edits so far in addition to the
+   distance. However, this approach has proven too slow (manipulating
+   maps instead of doubles while creating the levenshtein matrix).
+   It is however possible, to /trace/ back the patch on wich the full
+   levenshtein distance was created from the created matrix. This is 
+   described [[http://de.wikipedia.org/wiki/Levenshtein-Distanz][here]].
+   The order of branches in the backtrace function is important!
+   moving the check for substitutions to the front favours the way
+   with substitutions about other ways with insertions and deletions
+   which have the same error count
+
+   The edits between the files are represented as a map with the keys 
+   :insertions, :deletions, and :substitutions which have a sequence
+   of pairs [a b] as values where a and b specify the position where
+   the edit was performed in the ground-truth and the orc-results
+   texts
+
+   #+begin_src clojure :ns error-codes.core :tangle src/error_codes/core.clj
+     (defn backtrace [d i j acc]
+       (cond
+        (and (> i 0) (= (inc (mget d (dec i) j)) (mget d i j)))
+        (recur d (dec i) j (assoc acc :deletions (cons [(dec i) j] (:deletions acc))))
+        (and (> j 0) (= (inc (mget d i (dec j))) (mget d i j)))
+        (recur d i (dec j) (assoc acc :insertions (cons [i (dec j)] (:insertions acc))))
+        (and (> i 0) (> j 0) (= (inc (mget d (dec i) (dec j))) (mget d i j)))
+        (recur d (dec i) (dec j) (assoc acc :substitutions (cons [(dec i) (dec j)] (:substitutions acc))))
+        (and (> i 0) (> j 0) (= (mget d (dec i) (dec j)) (mget d i j)))
+        (recur d (dec i) (dec j) acc)
+        :else acc))
+   #+end_src 
+
+   #+RESULTS:
+   : #'error-codes.core/backtrace
+   
+** Calculating the edits
+   
+   With the lev and backtrace function, we can define the edits
+   function which returns the edits map described above with the
+   minimal edits between the two texts
+   #+begin_src clojure :ns error-codes.core :tangle src/error_codes/core.clj
+     (defn edits [a b]
+       (let [d (lev a b)]
+         (backtrace d (count a) (count b) {:insertions '() :deletions '()
+                                           :substitutions '()
+                                           :distance (mget d (count a) (count b))})))
+   #+end_src 
+
+   #+RESULTS:
+   : #'error-codes.core/edits
+
+   A few examples:
+   #+begin_src clojure :ns error-codes.test-core :tangle test/error_codes/test_core.clj :results pp
+     (deftest test-edits
+       (is (= (edits "a" "b") 
+              '{:insertions (), :deletions (), :substitutions ([0 0]), :distance 1}))
+       ;;swapping two characters is not multiple substitutions but insertion and deletions
+       ;;which is more in line with what humans see there.
+       (is (= (edits "ab" "ba")
+              '{:insertions ([0 0]), :deletions ([1 2]), :substitutions (), :distance 2}))
+       (is (= (edits "vr" "io")
+              '{:insertions (), :deletions (), :substitutions ([0 0] [1 1]), :distance 2}))
+       ;;many to one errors are substitutions followed by insertions
+       (is (= (edits "m" "rn")
+              '{:insertions ([1 1]), :deletions (), :substitutions ([0 0]), :distance 2}))
+       ;;one to many errors are substitutions followed by deletions
+       (is (= (edits "rn" "m")
+              '{:insertions (), :deletions ([1 1]), :substitutions ([0 0]), :distance 2}))
+       (is (= (edits "Kitten" "sitting")
+              '{:insertions ([6 6]), :deletions (), :substitutions ([0 0] [4 4]), :distance 3}))
+       (is (= (edits "Kitten" "sittieng")
+              '{:insertions ([4 4] [6 7]), :deletions (), :substitutions ([0 0]), :distance 3}))
+       (is (= (edits "Kitten" "iiittiing")
+              '{:insertions ([2 2] [5 6] [6 8]), :deletions (), :substitutions ([0 0] [4 5]), :distance 5}))
+       )
+
+
+     (test-edits)
+   #+end_src 
+
+   #+RESULTS:
+   : nil
+
+
+* Getting the error codes from the edit distance
+  With the edits in place, the problem of the proper text alignment is
+  solved. what is left to do is mapping the edits to the right error
+  codes. Some codes (like [1 1]) which is a simple substitution (see
+  table at the top) are trivial to extract from the edit distance.
+  But what about the one-to-many errors (codes [x 7]) or the
+  many-to-one errors (codes [7 x] or [x 6] the table is not
+  deterministic here)
+
+  Like test-edits showed above, one can recognise
+  many-to-one/one-to-many errors by substitutions which are followed
+  by insertions or deletions
+
+  Therefore, they have to be extracted before the substitutions,
+  deletions or insertions are extracted.
+
+  A good architecture for the extracting operation is therefore to
+  apply multiple extract /passes/ to the edits to generate the
+  error-codes. The extract phases can be defined as functions which 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+* Todos
+** TODO determine right error codes for many-to-one errors 
+   
