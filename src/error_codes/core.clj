@@ -93,7 +93,7 @@
   {\A 2 \a 2 \B 2 \b 2 \C 2 \c 1 \D 2 \d 2 \E 2 \e 1 \F 2 \f 1 \G 3 \g 2
    \H 2 \h 2 \I 2 \J 2 \i 1 \j 1 \K 2 \k 1 \L 2 \l 1 \M 4 \m 3 \N 3 \n 2
    \O 2 \o 2 \P 3 \p 2 \Q 2 \q 2 \R 3 \r 1 \S 2 \s 2 \T 2 \t 1 \U 2 \u 2
-   \V 3 \v 2 \W 4 \w 3 \X 2 \x 1 \Y 3 \y 2 \Z 2 \z 1})
+   \V 3 \v 2 \W 4 \w 3 \X 2 \x 1 \Y 3 \y 2 \Z 2 \z 1 \ü 2})
 
 
 (defn lookup-bar [char]
@@ -123,30 +123,44 @@
         :when (seq if)]
     [fs (concat fs if)]))
 
-
 (defn- take-bars [t1 t2 [a b] insdel type]
   (let [res (let [bar-count (lookup-bar (case type
                                 :one-to-many (nth t1 a)
-                                :many-to-one (nth t2 b)))]
+                                :many-to-one (nth t2 b)))
+                  _ (prn "bar-count " bar-count (nth t1 a))]
     (loop [[[ia ib] & is] insdel acc 0 ret []]
       (if ia
         (let [bc (lookup-bar (case type
                                :one-to-many (nth t2 ib)
-                               :many-to-one (nth t1 ia)))]
+                               :many-to-one (nth t1 ia)))
+              _ (prn "bc " bc (nth t2 ib)
+                     "acc " acc " ret " ret
+                     (>= (+ acc bc) bar-count)
+                     "ia ib " ia ib)]
           (if (>= (+ acc bc) bar-count)
             (conj ret [ia ib])
             (recur is (+ acc bc) (conj ret [ia ib]))))
         ret)))]
      (prn "take-bars " res)
      res))
-
+  ;;;todo take care of how many are allowed to be extracted
+  ;;;we know that count-free is > 0 at the beginning
+  ;;;be careful at the start of the error
 (defn- extract [t1 t2 fl type]
   (for [[fs insdel] fl]
-    (loop [[[a b] & ss] fs extr [] insdel insdel]
-      (if a
-        (let [ext (take-bars t1 t2 [a b] insdel type)]
-          (recur ss (conj extr [[a b] ext]) (drop (count ext) insdel)))
-        extr))))
+    (let [_ (prn "fs " fs "insdel " insdel "count-free" (- (count insdel) (count fs)))
+          count-free (- (count insdel) (count fs))]
+      (loop [[[a b] & ss :as aktfs] fs extr [] insdel insdel
+             count-free (- (count insdel) (count fs))]
+        (if (and a (seq insdel))
+          (let [ext (take-bars t1 t2 [a b] (take (inc count-free) insdel) type)
+                _ (prn "ext-after-take-bars " [a b]  ext "insdel-for-ext " insdel "count-free " count-free)]
+            (recur ;dont drop here
+             ss
+             (conj extr [[a b] ext])
+             (drop (count ext) insdel)
+             (- count-free (- (count ext) 1))))
+          extr)))))
 
 (defn- delete-from-edits [edits to-delete]
   (into {} (for [[k v] (dissoc edits :distance)] [k (remove (set to-delete) v)])))
@@ -155,17 +169,22 @@
 (defn extract-count-changing-errors [type edits t1 t2]
   (let [{:keys [substitutions insertions deletions]} edits
         fs (extract-following-substitutions substitutions)
+        _ (prn "fs " fs)
         fi (add-following fs (case type :one-to-many insertions :many-to-one deletions) type)
+        _ (prn "fi " fi)
         ext (apply concat (extract t1 t2 fi type))
+        _ (prn "ext " ext)
         nedits (delete-from-edits edits (partition 2 (flatten ext)))
         res
         [(for [[[a b] e] ext]
            (case (count e)
              1 [[(to-code-number (nth t1 a)) (to-code-number (nth t2 b))] [a b]]
-             [(case type
-                :one-to-many [(to-code-number (nth t1 a)) 7]
-                :many-to-one [7 (to-code-number (nth t2 b))]) [a b] (last e)])) nedits]
-        _ (prn "ext " ext "res" (first res))]
+             (case type
+               :one-to-many [[(to-code-number (nth t1 a)) 7]
+                             [a (second (first e))] [(inc a) (second (last e))]]
+               :many-to-one [[7 (to-code-number (nth t2 b))]
+                             [(first (first e)) b] [(first (last e)) (inc b)]]))) nedits]
+        _ (prn "extr " ext "res" (first res))]
     res))
 
 (def extraction-list
@@ -185,8 +204,22 @@
 (defn deploy-error-codes []
   (let [gts (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/")
         ocr-res (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")]
-    (doall (pmap (fn [gt ocr]
+    (doall (map (fn [gt ocr]
                    (let [filename (str "/home/kima/programming/ocr-visualizer/resources/public/edits/" (.getName gt))]
                      (prn "error-counts for " filename)
                      (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
-                 gts ocr-res))))
+                gts ocr-res))))
+
+
+
+(defn visualize [error-code a b]
+  (case (count error-code)
+    2 ["Substitution from"
+       (nth a (first (second error-code)))
+       "to " (nth b (second (second error-code)))]
+    3 (if (= 7 (second (first error-code)))
+        ;;one-to-many
+        ["One-to-many" (nth a (first (second error-code)))
+         "to " (apply str (map #(nth b %) (range (second (second error-code))
+                                                  (inc (second (nth error-code 2))))))]
+        ["Dont know yet"])))
