@@ -4,7 +4,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
 <title>Error Codes</title>
-<!-- 2014-05-01 Do 23:06 -->
+<!-- 2014-05-06 Tue 20:50 -->
 <meta  http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta  name="generator" content="Org-mode" />
 <meta  name="author" content="Maik Schünemann" />
@@ -874,7 +874,6 @@ the given and how to label the extracted codes
         <span style="color: #7fffd4;">:when</span> (<span style="color: #eedd82;">seq</span> if)]
     [fs (<span style="color: #eedd82;">concat</span> fs if)]))
 
-
 (<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">take-bars</span> [t1 t2 [a b] insdel type]
   (<span style="color: #b0c4de;">let</span> [res (<span style="color: #b0c4de;">let</span> [bar-count (lookup-bar (<span style="color: #b0c4de;">case</span> type
                                 <span style="color: #7fffd4;">:one-to-many</span> (<span style="color: #eedd82;">nth</span> t1 a)
@@ -885,21 +884,34 @@ the given and how to label the extracted codes
         (<span style="color: #b0c4de;">let</span> [bc (lookup-bar (<span style="color: #b0c4de;">case</span> type
                                <span style="color: #7fffd4;">:one-to-many</span> (<span style="color: #eedd82;">nth</span> t2 ib)
                                <span style="color: #7fffd4;">:many-to-one</span> (<span style="color: #eedd82;">nth</span> t1 ia)))
-              _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"bc "</span> bc)]
+              _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"bc "</span> bc (<span style="color: #eedd82;">nth</span> t2 ib)
+                     <span style="color: #ffa07a;">"acc "</span> acc <span style="color: #ffa07a;">" ret "</span> ret
+                     (<span style="color: #eedd82;">&gt;=</span> (<span style="color: #eedd82;">+</span> acc bc) bar-count)
+                     <span style="color: #ffa07a;">"ia ib "</span> ia ib)]
           (<span style="color: #b0c4de;">if</span> (<span style="color: #eedd82;">&gt;=</span> (<span style="color: #eedd82;">+</span> acc bc) bar-count)
             (<span style="color: #eedd82;">conj</span> ret [ia ib])
             (<span style="color: #b0c4de;">recur</span> is (<span style="color: #eedd82;">+</span> acc bc) (<span style="color: #eedd82;">conj</span> ret [ia ib]))))
         ret)))]
      (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"take-bars "</span> res)
      res))
-
+  <span style="color: #ff7f24;">;;;</span><span style="color: #ff7f24;">todo take care of how many are allowed to be extracted</span>
+  <span style="color: #ff7f24;">;;;</span><span style="color: #ff7f24;">we know that count-free is &gt; 0 at the beginning</span>
+  <span style="color: #ff7f24;">;;;</span><span style="color: #ff7f24;">be careful at the start of the error</span>
 (<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">extract</span> [t1 t2 fl type]
   (<span style="color: #b0c4de;">for</span> [[fs insdel] fl]
-    (<span style="color: #b0c4de;">loop</span> [[[a b] &amp; ss] fs extr [] insdel insdel]
-      (<span style="color: #b0c4de;">if</span> a
-        (<span style="color: #b0c4de;">let</span> [ext (take-bars t1 t2 [a b] insdel type)]
-          (<span style="color: #b0c4de;">recur</span> ss (<span style="color: #eedd82;">conj</span> extr [[a b] ext]) (<span style="color: #eedd82;">drop</span> (<span style="color: #eedd82;">count</span> ext) insdel)))
-        extr))))
+    (<span style="color: #b0c4de;">let</span> [_ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"fs "</span> fs <span style="color: #ffa07a;">"insdel "</span> insdel <span style="color: #ffa07a;">"count-free"</span> (<span style="color: #eedd82;">-</span> (<span style="color: #eedd82;">count</span> insdel) (<span style="color: #eedd82;">count</span> fs)))
+          count-free (<span style="color: #eedd82;">-</span> (<span style="color: #eedd82;">count</span> insdel) (<span style="color: #eedd82;">count</span> fs))]
+      (<span style="color: #b0c4de;">loop</span> [[[a b] &amp; ss <span style="color: #7fffd4;">:as</span> aktfs] fs extr [] insdel insdel
+             count-free (<span style="color: #eedd82;">-</span> (<span style="color: #eedd82;">count</span> insdel) (<span style="color: #eedd82;">count</span> fs))]
+        (<span style="color: #b0c4de;">if</span> (<span style="color: #b0c4de;">and</span> a (<span style="color: #eedd82;">seq</span> insdel))
+          (<span style="color: #b0c4de;">let</span> [ext (take-bars t1 t2 [a b] (<span style="color: #eedd82;">take</span> (<span style="color: #eedd82;">inc</span> count-free) insdel) type)
+                _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"ext-after-take-bars "</span> [a b]  ext <span style="color: #ffa07a;">"insdel-for-ext "</span> insdel <span style="color: #ffa07a;">"count-free "</span> count-free)]
+            (<span style="color: #b0c4de;">recur</span> <span style="color: #ff7f24;">;</span><span style="color: #ff7f24;">dont drop here</span>
+             ss
+             (<span style="color: #eedd82;">conj</span> extr [[a b] ext])
+             (<span style="color: #eedd82;">drop</span> (<span style="color: #eedd82;">count</span> ext) insdel)
+             (<span style="color: #eedd82;">-</span> count-free (<span style="color: #eedd82;">-</span> (<span style="color: #eedd82;">count</span> ext) 1))))
+          extr)))))
 
 (<span style="color: #00ffff;">defn-</span> <span style="color: #87cefa;">delete-from-edits</span> [edits to-delete]
   (<span style="color: #eedd82;">into</span> {} (<span style="color: #b0c4de;">for</span> [[k v] (<span style="color: #eedd82;">dissoc</span> edits <span style="color: #7fffd4;">:distance</span>)] [k (<span style="color: #eedd82;">remove</span> (<span style="color: #eedd82;">set</span> to-delete) v)])))
@@ -917,11 +929,16 @@ the given and how to label the extracted codes
         res
         [(<span style="color: #b0c4de;">for</span> [[[a b] e] ext]
            (<span style="color: #b0c4de;">case</span> (<span style="color: #eedd82;">count</span> e)
-             1 [[(to-code-number (<span style="color: #eedd82;">nth</span> t1 a)) (to-code-number (<span style="color: #eedd82;">nth</span> t2 b))] [a b]]
-             [(<span style="color: #b0c4de;">case</span> type
-                <span style="color: #7fffd4;">:one-to-many</span> [(to-code-number (<span style="color: #eedd82;">nth</span> t1 a)) 7]
-                <span style="color: #7fffd4;">:many-to-one</span> [7 (to-code-number (<span style="color: #eedd82;">nth</span> t2 b))]) [a b] (<span style="color: #eedd82;">last</span> e)])) nedits]
-        _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"ext "</span> ext <span style="color: #ffa07a;">"res"</span> (<span style="color: #eedd82;">first</span> res))]
+             1 (<span style="color: #b0c4de;">let</span> [[_ b] (<span style="color: #eedd82;">first</span> e)]
+                 [[(to-code-number (<span style="color: #eedd82;">nth</span> t1 a))
+                   (to-code-number (<span style="color: #eedd82;">nth</span> t2 b))]
+                  [a b]])
+             (<span style="color: #b0c4de;">case</span> type
+               <span style="color: #7fffd4;">:one-to-many</span> [[(to-code-number (<span style="color: #eedd82;">nth</span> t1 a)) 7]
+                             [a (<span style="color: #eedd82;">second</span> (<span style="color: #eedd82;">first</span> e))] [(<span style="color: #eedd82;">inc</span> a) (<span style="color: #eedd82;">second</span> (<span style="color: #eedd82;">last</span> e))]]
+               <span style="color: #7fffd4;">:many-to-one</span> [[7 (to-code-number (<span style="color: #eedd82;">nth</span> t2 b))]
+                             [(<span style="color: #eedd82;">first</span> (<span style="color: #eedd82;">first</span> e)) b] [(<span style="color: #eedd82;">first</span> (<span style="color: #eedd82;">last</span> e)) (<span style="color: #eedd82;">inc</span> b)]]))) nedits]
+        _ (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"extr "</span> ext <span style="color: #ffa07a;">"res"</span> (<span style="color: #eedd82;">first</span> res))]
     res))
 </pre>
 </div>
@@ -1011,7 +1028,21 @@ doesn't belong to the code - ignore
                    (<span style="color: #b0c4de;">let</span> [filename (<span style="color: #eedd82;">str</span> <span style="color: #ffa07a;">"/home/kima/programming/ocr-visualizer/resources/public/edits/"</span> (<span style="color: #b0c4de;">.getName</span> gt))]
                      (<span style="color: #eedd82;">prn</span> <span style="color: #ffa07a;">"error-counts for "</span> filename)
                      (<span style="color: #eedd82;">spit</span> filename (<span style="color: #eedd82;">pr-str</span> (error-codes (<span style="color: #eedd82;">slurp</span> gt) (<span style="color: #eedd82;">slurp</span> ocr))))))
-                 gts ocr-res))))
+                gts ocr-res))))
+
+
+
+(<span style="color: #00ffff;">defn</span> <span style="color: #87cefa;">visualize</span> [error-code a b]
+  (<span style="color: #b0c4de;">case</span> (<span style="color: #eedd82;">count</span> error-code)
+    2 [<span style="color: #ffa07a;">"Substitution from"</span>
+       (<span style="color: #eedd82;">nth</span> a (<span style="color: #eedd82;">first</span> (<span style="color: #eedd82;">second</span> error-code)))
+       <span style="color: #ffa07a;">"to "</span> (<span style="color: #eedd82;">nth</span> b (<span style="color: #eedd82;">second</span> (<span style="color: #eedd82;">second</span> error-code)))]
+    3 (<span style="color: #b0c4de;">if</span> (<span style="color: #eedd82;">=</span> 7 (<span style="color: #eedd82;">second</span> (<span style="color: #eedd82;">first</span> error-code)))
+        <span style="color: #ff7f24;">;;</span><span style="color: #ff7f24;">one-to-many</span>
+        [<span style="color: #ffa07a;">"One-to-many"</span> (<span style="color: #eedd82;">nth</span> a (<span style="color: #eedd82;">first</span> (<span style="color: #eedd82;">second</span> error-code)))
+         <span style="color: #ffa07a;">"to "</span> (<span style="color: #eedd82;">apply</span> str (<span style="color: #eedd82;">map</span> #(<span style="color: #eedd82;">nth</span> b %) (<span style="color: #eedd82;">range</span> (<span style="color: #eedd82;">second</span> (<span style="color: #eedd82;">second</span> error-code))
+                                                  (<span style="color: #eedd82;">inc</span> (<span style="color: #eedd82;">second</span> (<span style="color: #eedd82;">nth</span> error-code 2))))))]
+        [<span style="color: #ffa07a;">"Dont know yet"</span>])))
 </pre>
 </div>
 </div>
@@ -1033,7 +1064,7 @@ doesn't belong to the code - ignore
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: Maik Schünemann</p>
-<p class="date">Created: 2014-05-01 Do 23:06</p>
+<p class="date">Created: 2014-05-06 Tue 20:50</p>
 <p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 24.3.1 (<a href="http://orgmode.org">Org</a> mode 8.2.6)</p>
 <p class="validation"><a href="http://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>

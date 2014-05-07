@@ -1,3 +1,4 @@
+
 #+TITLE:Error Codes
 #+AUTHOR: Maik Schünemann
 #+email: maikschuenemann@gmail.com
@@ -500,7 +501,10 @@
               res
               [(for [[[a b] e] ext]
                  (case (count e)
-                   1 [[(to-code-number (nth t1 a)) (to-code-number (nth t2 b))] [a b]]
+                   1 (let [[_ b] (first e)]
+                       [[(to-code-number (nth t1 a))
+                         (to-code-number (nth t2 b))]
+                        [a b]])
                    (case type
                      :one-to-many [[(to-code-number (nth t1 a)) 7]
                                    [a (second (first e))] [(inc a) (second (last e))]]
