@@ -133,7 +133,7 @@
         (let [bc (lookup-bar (case type
                                :one-to-many (nth t2 ib)
                                :many-to-one (nth t1 ia)))
-              _ (prn "bc " bc (nth t2 ib)
+#_#_              _ (prn "bc " bc (nth t2 ib)
                      "acc " acc " ret " ret
                      (>= (+ acc bc) bar-count)
                      "ia ib " ia ib)]
@@ -166,6 +166,18 @@
   (into {} (for [[k v] (dissoc edits :distance)] [k (remove (set to-delete) v)])))
 
 
+(defn to-single-error [t1 t2 a b]
+  (cond
+   (= (count t1) a) (let [c2 (nth t2 b)
+                          f2 (to-code-number c2)]
+                       [[8 f2] [a b]])
+   (= (count t2) b) (let [c1 (nth t1 a) 
+                          f1 (to-code-number c1)]
+                       [[f1 8] [a b]]);;deletion
+   :else [[(to-code-number (nth t1 a))
+           (to-code-number (nth t2 b))]
+          [a b]]))
+
 (defn extract-count-changing-errors [type edits t1 t2]
   (let [{:keys [substitutions insertions deletions]} edits
         fs (extract-following-substitutions substitutions)
@@ -178,7 +190,8 @@
         res
         [(for [[[a b] e] ext]
            (case (count e)
-             1 [[(to-code-number (nth t1 a)) (to-code-number (nth t2 b))] [a b]]
+             1 (let [[_ b] (first e)]
+                 (to-single-error t1 t2 a b))
              (case type
                :one-to-many [[(to-code-number (nth t1 a)) 7]
                              [a (second (first e))] [(inc a) (second (last e))]]
@@ -204,7 +217,7 @@
 (defn deploy-error-codes []
   (let [gts (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/")
         ocr-res (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")]
-    (doall (map (fn [gt ocr]
+    (doall (pmap (fn [gt ocr]
                    (let [filename (str "/home/kima/programming/ocr-visualizer/resources/public/edits/" (.getName gt))]
                      (prn "error-counts for " filename)
                      (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
