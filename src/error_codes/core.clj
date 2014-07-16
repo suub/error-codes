@@ -214,11 +214,22 @@
        (sort-by #(.getName  %))))
 #_(file-locations for now... "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/" "/home/kima/programming/ocr-visualizer/resources/public/edits," "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")
 
-(defn deploy-error-codes []
+(defn deploy-to-ocr-visualizer []
   (let [gts (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/")
         ocr-res (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")]
     (doall (pmap (fn [gt ocr]
                    (let [filename (str "/home/kima/programming/ocr-visualizer/resources/public/edits/" (.getName gt))]
+                     (prn "error-counts for " filename)
+                     (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
+                 gts ocr-res))))
+
+
+(defn deploy-error-codes [base-directory]
+  (let [gts (get-files-sorted (file base-directory "ground-truth/"))
+        ocr-res (get-files-sorted (file base-directory "ocr-results/"))]
+    (doall (pmap (fn [gt ocr]
+                   (let [filename (file base-directory
+                                        "edits/" (.getName gt))]
                      (prn "error-counts for " filename)
                      (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
                 gts ocr-res))))

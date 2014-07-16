@@ -584,35 +584,34 @@
 * Helpers for deployment to ocr-visualizer
   doesn't belong to the code - ignore
   #+begin_src clojure :ns error-codes.core :tangle src/error_codes/core.clj
-    (use 'clojure.java.io)
-    (defn get-files-sorted [dir]
-      (->> (file-seq (file dir))
-           rest
-           (sort-by #(.getName  %))))
-    #_(file-locations for now... "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/" "/home/kima/programming/ocr-visualizer/resources/public/edits," "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")
+      (use 'clojure.java.io)
+      (defn get-files-sorted [dir]
+        (->> (file-seq (file dir))
+             rest
+             (sort-by #(.getName  %))))
 
-    (defn deploy-error-codes []
+
+    (defn deploy-to-ocr-visualizer []
       (let [gts (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/")
             ocr-res (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")]
-        (doall (map (fn [gt ocr]
+        (doall (pmap (fn [gt ocr]
                        (let [filename (str "/home/kima/programming/ocr-visualizer/resources/public/edits/" (.getName gt))]
+                       (prn "error-counts for " filename)
+                       (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
+                     gts ocr-res))))
+
+
+    (defn deploy-error-codes [base-directory]
+      (let [gts (get-files-sorted (file base-directory "ground-truth/"))
+            ocr-res (get-files-sorted (file base-directory "ocr-results/"))]
+        (doall (pmap (fn [gt ocr]
+                       (let [filename (file base-directory
+                                            "edits/" (.getName gt))]
                          (prn "error-counts for " filename)
                          (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
-                    gts ocr-res))))
+                     gts ocr-res))))
 
 
-
-    (defn visualize [error-code a b]
-      (case (count error-code)
-        2 ["Substitution from"
-           (nth a (first (second error-code)))
-           "to " (nth b (second (second error-code)))]
-        3 (if (= 7 (second (first error-code)))
-            ;;one-to-many
-            ["One-to-many" (nth a (first (second error-code)))
-             "to " (apply str (map #(nth b %) (range (second (second error-code))
-                                                      (inc (second (nth error-code 2))))))]
-            ["Dont know yet"])))
   #+end_src 
 
   #+RESULTS:
