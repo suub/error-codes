@@ -227,12 +227,34 @@
 (defn deploy-error-codes [base-directory]
   (let [gts (get-files-sorted (file base-directory "ground-truth/"))
         ocr-res (get-files-sorted (file base-directory "ocr-results/"))]
-    (doall (pmap (fn [gt ocr]
+    (doall (map (fn [gt ocr]
                    (let [filename (file base-directory
                                         "edits/" (.getName gt))]
                      (prn "error-counts for " filename)
                      (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
                 gts ocr-res))))
+
+(defn word-count [text]
+  (as-> text x
+        (.split x "\\s*")
+        (remove empty? x)
+        (count x)))
+
+
+
+
+(defn generate-statistics
+  ([base-directory] (generate-statistics base-directory identity))
+  ([base-directory flavour]
+     (let [ocr-res (map slurp (get-files-sorted (file base-directory "ocr-results/")))
+           edits (map (comp read-string slurp)  (get-files-sorted (file base-directory "edits/")))
+           [errors charc] (reduce (fn [[edits wc] [nedits nocr]]
+                                    [(concat edits nedits) (+ wc (count nocr))])
+                                  ['() 0] (map (fn [a b] [a b]) edits ocr-res))]
+       {:error-rate (* 100 (/ (count errors) charc))
+        :charc charc :error-number (count errors)
+        :by-category (into {} (map (fn [[k v]] [k (count v)]) (group-by first errors)))}
+       )))
 
 
 
