@@ -1,5 +1,6 @@
 (ns error-codes.core
-  (:require [clojure.java.io :refer [file]])
+  (:require [clojure.java.io :refer [file]]
+            [clojure.set :as set])
   (:use [clojure.core.matrix]))
 
 (set! *warn-on-reflection* true)
@@ -62,8 +63,9 @@
 
 (defn to-code-number [^Character c]
   (cond
+   (#{\ä \ö \ü \ß \Ä \Ö \Ü \( \) \„ \¬} c) 4
    (Character/isLetter c) 1
-   (#{\. \, \? \!} c) 2
+   (#{\. \, \? \! \: \;} c) 2
    (Character/isDigit c) 3
    (= c \space) 5
    :else 4))
@@ -149,7 +151,7 @@
 (defn- extract [t1 t2 fl type]
   (for [[fs insdel] fl]
     (let [_ (prn "fs " fs "insdel " insdel "count-free" (- (count insdel) (count fs)))
-          count-free (- (count insdel) (count fs))]
+          count-freepp (- (count insdel) (count fs))]
       (loop [[[a b] & ss :as aktfs] fs extr [] insdel insdel
              count-free (- (count insdel) (count fs))]
         (if (and a (seq insdel))
@@ -227,12 +229,31 @@
 (defn deploy-error-codes [base-directory]
   (let [gts (get-files-sorted (file base-directory "ground-truth/"))
         ocr-res (get-files-sorted (file base-directory "ocr-results/"))]
-    (doall (map (fn [gt ocr]
+    (doall (pmap (fn [gt ocr]
                    (let [filename (file base-directory
                                         "edits/" (.getName gt))]
                      (prn "error-counts for " filename)
                      (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
-                gts ocr-res))))
+                 gts ocr-res))))
+
+(def base-directories
+  ["/home/kima/programming/grenzbote-files/grenzbote/abby"
+   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_mit-woerterbuch"
+   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_mit-woerterbuch_2014-07-16"
+   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_ohne-woerterbuch"
+   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_ohne-woerterbuch_2014-07-16"
+   "/home/kima/programming/grenzbote-files/grenzbote/tesseract_trainiert_gem"
+   "/home/kima/programming/grenzbote-files/grenzbote/tesseract_untrainiert"
+   "/home/kima/programming/grenzbote-files/grenzbote/Wikisource-erster-Band"
+   "/home/kima/programming/grenzbote-files/grenzbote/Wikisource-erster-Band_2014-07-16"
+   "/home/kima/programming/grenzbote-files/grenzbote/statistic-test"
+   "/home/kima/programming/grenzbote-files/grenzbote/new-test"
+   ])
+
+(defn deploy-base-direcories []
+  (doseq [bd base-directories]
+    (prn "<<<<<<<<<<<<<<<<<now " bd ">>>>>>>>>>>>>>>>>>")
+    (deploy-error-codes bd)))
 
 (defn word-count [text]
   (as-> text x
@@ -241,31 +262,92 @@
         (count x)))
 
 
+(defn error-code-to-matrix-entries [augmented-error-code]
+  (let [[[[a b] & res :as error-code] [f t]] augmented-error-code]
+    (cond
+     (some #{8} [a b]) [[a b]]
+     (= b 7) [[a b]]
+     (= a 7) (map (fn [fc] [(to-code-number fc) 6]) f)
+     (or (= (str f) (.toUpperCase (str t)))
+         (= (str t) (.toLowerCase (str f))))
+     [[1 9]]
+     :else [[a b]])))
+(defn save-nth [x p]
+  (if (>= p (count x)) \?
+      (nth x p)))
 
+(defn save-subs [x ps pe]
+  (if (or (>= ps (count x))
+          (>= pe (count x)))
+    "?" (subs x ps pe)))
+
+(defn build-error [a b error-code]
+  (cond
+   (= 8 (get-in error-code [0 0]))
+   ["" (str (save-nth b (get-in error-code [1 1])))]
+   (= 8 (get-in error-code [0 1]))
+   [(str (save-nth a (get-in error-code [1 0]))) ""]
+   (= 2 (count error-code))
+   (let [[code [l r]] error-code] ;;todo 
+     [(str (save-nth a l))
+      (str (save-nth b r))])
+   (= 7 (get-in error-code [0 1]))
+   (let [[code [ls rs] [le re]] error-code]
+     [(save-subs a ls le) (save-subs b rs (inc re))])
+   (= 7 (get-in error-code [0 0]))
+   (let [[code [ls rs] [le re]] error-code]
+     [(save-subs a ls (inc le)) (save-subs b rs re)])))
+
+
+
+(defn augment-error-code [a b error-code]
+  [error-code (build-error a b error-code)])
+
+
+(defn no-insertions-or-deletions [matrix-entry]
+  (not (some #{8} matrix-entry)))
+
+(def stichwortsuche #{[1 1] [1 2] [1 3] [1 4] [1 5] [1 6] [1 7] [1 8]
+                      [3 1] [3 2] [3 3] [3 4] [3 5] [3 6] [3 7] [3 8]
+                      [4 1] [4 2] [4 3] [4 4] [4 5] [4 6] [4 7] [4 8]
+                      [8 1] [8 2] [8 3] [8 4] [8 5] [8 6] [8 7]})
+
+(def case-sensitive-stickwortsuche
+  (set/union stichwortsuche #{[1 9] [4 9]}))
+
+(def phrasensuche
+  (set/union stichwortsuche
+             #{[5 1] [5 2] [5 3] [5 4] [5 5] [5 6] [5 7] [5 8]}))
+
+(def flavour-list
+  {"stichwortsuche" stichwortsuche
+   "case-sensitive-stichwortsuche" case-sensitive-stickwortsuche
+   "phrasensuche" phrasensuche
+   "no-insertions-or-deletions" no-insertions-or-deletions
+   "kein flavour" (constantly true)})
 
 (defn generate-statistics
   ([base-directory] (generate-statistics base-directory identity))
   ([base-directory flavour]
-     (let [ocr-res (map slurp (get-files-sorted (file base-directory "ocr-results/")))
+     (let [ground-truth (map slurp (get-files-sorted (file base-directory "ground-truth/")))
+           ocr-res (map slurp (get-files-sorted (file base-directory "ocr-results/")))
            edits (map (comp read-string slurp)  (get-files-sorted (file base-directory "edits/")))
-           [errors charc] (reduce (fn [[edits wc] [nedits nocr]]
-                                    [(concat edits nedits) (+ wc (count nocr))])
-                                  ['() 0] (map (fn [a b] [a b]) edits ocr-res))]
-       {:error-rate (* 100 (/ (count errors) charc))
+           errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
+                       (mapcat error-code-to-matrix-entries)
+                       (filter flavour))
+           charc (apply + (map count ocr-res))]
+       {:error-rate (double (* 100 (/ (count errors) charc)))
         :charc charc :error-number (count errors)
-        :by-category (into {} (map (fn [[k v]] [k (count v)]) (group-by first errors)))}
-       )))
+        :by-category (frequencies errors)})))
+
+(defn gen-statistics-for-base-directories [bd]
+  (into {} (for [d bd]
+             (do (prn "for base directory " d)
+                 [d (into {}
+                          (for [[n f] flavour-list]
+                            (do (prn "gen-statistics d n" d n)
+                                [n (generate-statistics d f)])))]))))
 
 
 
-(defn visualize [error-code a b]
-  (case (count error-code)
-    2 ["Substitution from"
-       (nth a (first (second error-code)))
-       "to " (nth b (second (second error-code)))]
-    3 (if (= 7 (second (first error-code)))
-        ;;one-to-many
-        ["One-to-many" (nth a (first (second error-code)))
-         "to " (apply str (map #(nth b %) (range (second (second error-code))
-                                                  (inc (second (nth error-code 2))))))]
-        ["Dont know yet"])))
+(edits "a" "b")

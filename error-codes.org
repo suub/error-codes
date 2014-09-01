@@ -617,12 +617,70 @@
   #+RESULTS:
   : #'error-codes.core/visualize
 
+* Helpers for generating statistics
+  #+begin_src clojure :ns error-codes.core :tangle src/error_codes/core.clj
+    (defn word-count [text]
+      (as-> text x
+            (.split x "\\s*")
+            (remove empty? x)
+            (count x)))
 
+
+    (defn error-code-to-matrix-entries [augmented-error-code]
+      (let [[[[a b] & res :as error-code] [f t]] augmented-error-code]
+        (cond
+         (some #{8} [a b]) [[a b]]
+         (= b 7) [[a b]]
+         (= a 7) (map (fn [fc] [(to-code-number fc) 6]) f)
+         (or (= (str b) (.toUpperCase (str a)))
+             (= (str a) (.toLowerCase (str b))))
+         [[1 9]]
+         :else [[a b]])))
+
+    (defn augment-error-code [a b error-code]
+      [error-code (build-error a b error-code)])
+
+    (defn no-insertions-or-deletions [matrix-entry]
+      (not (some #{8} matrix-entry)))
+
+    (defn generate-statistics
+      ([base-directory] (generate-statistics base-directory identity))
+      ([base-directory flavour]
+         (let [ground-truth (map slurp (get-files-sorted (file base-directory "ground-truth/")))
+               ocr-res (map slurp (get-files-sorted (file base-directory "ocr-results/")))
+               edits (map (comp read-string slurp)  (get-files-sorted (file base-directory "edits/")))
+               errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
+                           (mapcat error-code-to-matrix-entries)
+                           (filter flavour))
+               charc (apply + (map count ocr-res))]
+           {:error-rate (* 100 (/ (count errors) charc))
+            :charc charc :error-number (count errors)
+            :by-category (frequencies errors)})))
+
+
+    (defn build-error [a b error-code]
+      (cond
+       (= 8 (get-in error-code [0 0]))
+       ["" (str (nth b (get-in error-code [1 1])))]
+       (= 8 (get-in error-code [0 1]))
+       [(str (nth a (get-in error-code [1 0]))) ""]
+       (= 2 (count error-code))
+       (let [[code [l r]] error-code]
+         [(str (nth a l)) (str (nth b r))])
+       (= 7 (get-in error-code [0 1]))
+       (let [[code [ls rs] [le re]] error-code]
+         [(subs a ls le) (subs b rs (inc re))])
+       (= 7 (get-in error-code [0 0]))
+       (let [[code [ls rs] [le re]] error-code]
+         [(subs a ls (inc le)) (subs b rs re)])))
+
+
+  #+end_src 
 
 
 
 
 
 * Todos
-** TODO determine right error codes for many-to-one errors 
+** TODO Maybe we need context aware filtering to get rid of dirt errors at the beginning
    
