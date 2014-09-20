@@ -248,6 +248,7 @@
    "/home/kima/programming/grenzbote-files/grenzbote/Wikisource-erster-Band_2014-07-16"
    "/home/kima/programming/grenzbote-files/grenzbote/statistic-test"
    "/home/kima/programming/grenzbote-files/grenzbote/new-test"
+   "/home/kima/programming/grenzbote-files/grenzbote/abby_verbessert"
    ])
 
 (defn deploy-base-direcories []
@@ -319,19 +320,95 @@
   (set/union stichwortsuche
              #{[5 1] [5 2] [5 3] [5 4] [5 5] [5 6] [5 7] [5 8]}))
 
+(defn strip-first-and-last-lines [errors gt ocr]
+  (let [lines (.split gt "\n")
+        end-of-first-line (count (first lines))
+        start-of-last-line (- (count gt) (count (last lines)))]
+    (prn end-of-first-line start-of-last-line)
+    (filter (fn [[code [gt _] & rest]]
+              (> start-of-last-line gt end-of-first-line)) errors)))
+
+
+(defn strip-start-and-end-errors [errors gt ocr]
+  (let [starting (take-while #(some (fn [[code [_ ocr] & rest]]
+                                      (= % ocr)) errors) (range))
+        ending (take-while #(some (fn [[code [_ ocr] & rest]]
+                                    (= % ocr)) errors)
+                           (range (dec (count ocr)) 0 -1))
+        starting (or (last starting) 0)
+        ending (or (last ending) (count ocr))]
+    (prn starting ending)
+    (filter (fn [[code [_ ocr] & rest]]
+              (> ending ocr starting)) errors)))
+
+(defn strip-newline-errors [errors gt ocr]
+  (remove (fn [error]
+            (->> error
+                 (augment-error-code gt ocr)
+                 second
+                 (some #(.contains %1 "\n")))) errors))
+
+
 (def flavour-list
-  {"stichwortsuche" stichwortsuche
-   "case-sensitive-stichwortsuche" case-sensitive-stickwortsuche
-   "phrasensuche" phrasensuche
-   "no-insertions-or-deletions" no-insertions-or-deletions
-   "kein flavour" (constantly true)})
+  {"stichwortsuche" [[]  stichwortsuche]
+   "case-sensitive-stichwortsuche" [[] case-sensitive-stickwortsuche]
+   "phrasensuche" [[] phrasensuche]
+   "no-insertions-or-deletions" [[] no-insertions-or-deletions]
+   "stichwortsuche ohne erste und letzte Zeile" [[strip-first-and-last-lines]  stichwortsuche]
+   "case-sensitive-stichwortsuche ohne erste und letzte Zeile" [[strip-first-and-last-lines] case-sensitive-stickwortsuche]
+   "phrasensuche ohne erste und letzte Zeile" [[strip-first-and-last-lines] phrasensuche]
+   "no-insertions-or-deletions ohne erste und letzte Zeile" [[strip-first-and-last-lines] no-insertions-or-deletions]
+   "stichwortsuche ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors]  stichwortsuche]
+   "case-sensitive-stichwortsuche ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] case-sensitive-stickwortsuche]
+   "phrasensuche ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] phrasensuche]
+   "no-insertions-or-deletions ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] no-insertions-or-deletions]
+   "kein flavour" [[] (constantly true)]
+   "kein flavour ohne erste und letzte Zeile" [[strip-first-and-last-lines] (constantly true)]
+   "kein flavour ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] (constantly true)]
+   "kein flavour ohne newlines" [[strip-newline-errors] (constantly true)]
+   "stichwortsuche ohne newlines" [[strip-newline-errors]
+                                   stichwortsuche]
+   "case-sensitive-stichwortsuche ohne newlines" [[strip-newline-errors]
+                                                  case-sensitive-stickwortsuche]
+   "phrasensuche ohne newlines" [[strip-newline-errors]
+                                 phrasensuche]
+   "no-insertions-or-deletions ohne newlines" [[strip-newline-errors]
+                                               no-insertions-or-deletions]
+   
+   "stichwortsuche ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
+                                   stichwortsuche]
+   "case-sensitive-stichwortsuche ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
+                                                  case-sensitive-stickwortsuche]
+   "phrasensuche ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
+                                 phrasensuche]
+   "no-insertions-or-deletions ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
+                                                                           no-insertions-or-deletions]
+   "stichwortsuche ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
+                                   stichwortsuche]
+   "case-sensitive-stichwortsuche ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
+                                                  case-sensitive-stickwortsuche]
+   "phrasensuche ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
+                                 phrasensuche]
+   "no-insertions-or-deletions ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
+                                               no-insertions-or-deletions]
+})
+
+
+(defn run-filters [filters errors ground-truth ocr-results]
+  (reduce (fn [errors filter]
+            (filter errors ground-truth ocr-results))
+          errors filters))
 
 (defn generate-statistics
-  ([base-directory] (generate-statistics base-directory identity))
-  ([base-directory flavour]
+  ([base-directory] (generate-statistics base-directory [] identity))
+  ([base-directory flavour] (generate-statistics base-directory [] flavour))
+  ([base-directory filters flavour]
      (let [ground-truth (map slurp (get-files-sorted (file base-directory "ground-truth/")))
            ocr-res (map slurp (get-files-sorted (file base-directory "ocr-results/")))
            edits (map (comp read-string slurp)  (get-files-sorted (file base-directory "edits/")))
+           edits (map (partial run-filters filters)
+                      edits ground-truth ocr-res)
+           _ (prn (first edits))
            errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
                        (mapcat error-code-to-matrix-entries)
                        (filter flavour))
@@ -346,7 +423,7 @@
                  [d (into {}
                           (for [[n f] flavour-list]
                             (do (prn "gen-statistics d n" d n)
-                                [n (generate-statistics d f)])))]))))
+                                [n (apply generate-statistics d f)])))]))))
 
 
 
