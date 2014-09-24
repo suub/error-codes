@@ -86,7 +86,7 @@
 
 (defn extract-deletion-errors [edits t1 t2]
   (let [codes (for [[p1 p2] (:deletions edits)]
-                (let [c1 (nth t1 p1) 
+                (let [c1 (nth t1 p1)
                       f1 (to-code-number c1)]
                   [[f1 8] [p1 p2]]))]
     [codes (assoc edits :deletions [])]))
@@ -173,7 +173,7 @@
    (= (count t1) a) (let [c2 (nth t2 b)
                           f2 (to-code-number c2)]
                        [[8 f2] [a b]])
-   (= (count t2) b) (let [c1 (nth t1 a) 
+   (= (count t2) b) (let [c1 (nth t1 a)
                           f1 (to-code-number c1)]
                        [[f1 8] [a b]]);;deletion
    :else [[(to-code-number (nth t1 a))
@@ -288,7 +288,7 @@
    (= 8 (get-in error-code [0 1]))
    [(str (save-nth a (get-in error-code [1 0]))) ""]
    (= 2 (count error-code))
-   (let [[code [l r]] error-code] ;;todo 
+   (let [[code [l r]] error-code] ;;todo
      [(str (save-nth a l))
       (str (save-nth b r))])
    (= 7 (get-in error-code [0 1]))
