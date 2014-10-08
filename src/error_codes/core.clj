@@ -350,56 +350,19 @@
 
 
 (def flavour-list
-  {"stichwortsuche" [[]  stichwortsuche]
-   "case-sensitive-stichwortsuche" [[] case-sensitive-stickwortsuche]
-   "phrasensuche" [[] phrasensuche]
-   "no-insertions-or-deletions" [[] no-insertions-or-deletions]
-   "stichwortsuche ohne erste und letzte Zeile" [[strip-first-and-last-lines]  stichwortsuche]
-   "case-sensitive-stichwortsuche ohne erste und letzte Zeile" [[strip-first-and-last-lines] case-sensitive-stickwortsuche]
-   "phrasensuche ohne erste und letzte Zeile" [[strip-first-and-last-lines] phrasensuche]
-   "no-insertions-or-deletions ohne erste und letzte Zeile" [[strip-first-and-last-lines] no-insertions-or-deletions]
-   "stichwortsuche ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors]  stichwortsuche]
-   "case-sensitive-stichwortsuche ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] case-sensitive-stickwortsuche]
-   "phrasensuche ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] phrasensuche]
-   "no-insertions-or-deletions ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] no-insertions-or-deletions]
-   "kein flavour" [[] (constantly true)]
-   "kein flavour ohne erste und letzte Zeile" [[strip-first-and-last-lines] (constantly true)]
-   "kein flavour ohne Fehler am Anfang und Ende" [[strip-start-and-end-errors] (constantly true)]
-   "kein flavour ohne newlines" [[strip-newline-errors] (constantly true)]
-   "stichwortsuche ohne newlines" [[strip-newline-errors]
-                                   stichwortsuche]
-   "case-sensitive-stichwortsuche ohne newlines" [[strip-newline-errors]
-                                                  case-sensitive-stickwortsuche]
-   "phrasensuche ohne newlines" [[strip-newline-errors]
-                                 phrasensuche]
-   "no-insertions-or-deletions ohne newlines" [[strip-newline-errors]
-                                               no-insertions-or-deletions]
-   
-   "stichwortsuche ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
-                                   stichwortsuche]
-   "case-sensitive-stichwortsuche ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
-                                                  case-sensitive-stickwortsuche]
-   "phrasensuche ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
-                                 phrasensuche]
-   "no-insertions-or-deletions ohne newlines ohne erste und letzte Zeile" [[strip-newline-errors strip-first-and-last-lines]
-                                                                           no-insertions-or-deletions]
-   "stichwortsuche ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
-                                   stichwortsuche]
-   "case-sensitive-stichwortsuche ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
-                                                  case-sensitive-stickwortsuche]
-   "phrasensuche ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
-                                 phrasensuche]
-   "no-insertions-or-deletions ohne newlines ohne Fehler am Anfang und Ende" [[strip-newline-errors strip-start-and-end-errors]
-                                               no-insertions-or-deletions]
-})
-
+  {"stichwortsuche" [[strip-newline-errors strip-start-and-end-errors]
+                     stichwortsuche]
+   "case-sensitive-stichwortsuche" [[strip-newline-errors strip-start-and-end-errors] case-sensitive-stickwortsuche]
+   "phrasensuche" [[strip-newline-errors strip-start-and-end-errors] phrasensuche]
+   "alle Fehler" [[strip-newline-errors strip-start-and-end-errors]
+                   (constantly true)]})
 
 (defn run-filters [filters errors ground-truth ocr-results]
   (reduce (fn [errors filter]
             (filter errors ground-truth ocr-results))
           errors filters))
 
-(defn generate-statistics
+(defn generate-statistics ;;setze vereinbarte standartwerte
   ([base-directory] (generate-statistics base-directory [] identity))
   ([base-directory flavour] (generate-statistics base-directory [] flavour))
   ([base-directory filters flavour]
@@ -425,6 +388,37 @@
                             (do (prn "gen-statistics d n" d n)
                                 [n (apply generate-statistics d f)])))]))))
 
+
+(defn correction-statistic [gt ocr-unverbessert ocr-verbessert error-codes-unverbessert error-codes-verbessert]
+  ;;todo wenn korrektur zeichen löscht oder einfügt dann ist difference hier nicht mehr korrekt
+  ;;es müsste dann gefiltert werden wobei die position im ground truth als kennzeichnung dient
+  (let [false-positives (set/difference (into #{} error-codes-verbessert) (into #{} error-codes-unverbessert))
+        false-negatives (set/difference  (into #{} error-codes-verbessert) false-positives)
+        true-positives (set/difference (into #{} error-codes-unverbessert) (into #{} error-codes-verbessert))]
+    {:false-positives (map (partial augment-error-code gt ocr-verbessert) false-positives)
+     :false-negatives (map (partial augment-error-code gt ocr-verbessert) false-negatives)
+     :true-positives (map (partial augment-error-code gt ocr-unverbessert) true-positives )}))
+
+(defn run-filters [filters errors ground-truth ocr-results]
+  (reduce (fn [errors filter]
+            (filter errors ground-truth ocr-results))
+          errors filters))
+
+(defn generate-correction-statistics
+  ([base-directory-unverbessert base-directory-verbessert]
+     (generate-correction-statistics base-directory-unverbessert base-directory-verbessert [strip-newline-errors strip-start-and-end-errors]))
+  ([base-directory-unverbessert base-directory-verbessert filters] 
+     (let [gts (get-files-sorted (file base-directory-unverbessert "ground-truth/"))
+           gt-text (map slurp gts)
+           ocr-res-unverb (map slurp (get-files-sorted (file base-directory-unverbessert "ocr-results/")))
+           ocr-res-verb (map slurp (get-files-sorted (file base-directory-verbessert "ocr-results/")))
+           error-codes-verb (map (comp read-string slurp) (get-files-sorted (file base-directory-verbessert "edits/")))
+           error-codes-unverb (map (comp read-string slurp) (get-files-sorted (file base-directory-unverbessert "edits/")))
+           error-codes-verb (map (partial run-filters filters) error-codes-verb gt-text ocr-res-verb)
+           error-codes-unverb (map (partial run-filters filters) error-codes-unverb gt-text ocr-res-unverb)]
+       (pmap (fn [gt ocr-unverb ocr-verb ec-verb ec-unverb page]
+               (assoc (correction-statistic gt ocr-unverb ocr-verb ec-unverb ec-verb) :pages [page]))
+             gt-text ocr-res-unverb ocr-res-verb error-codes-verb error-codes-unverb (map (memfn getName) gts)))))
 
 
 (edits "a" "b")
