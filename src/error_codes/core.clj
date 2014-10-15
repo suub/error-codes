@@ -248,6 +248,7 @@
    "/home/kima/programming/grenzbote-files/grenzbote/Wikisource-erster-Band_2014-07-16"
    "/home/kima/programming/grenzbote-files/grenzbote/statistic-test"
    "/home/kima/programming/grenzbote-files/grenzbote/new-test"
+   "/home/kima/programming/grenzbote-files/grenzbote/abby_verbessert"
    ])
 
 (defn deploy-base-direcories []
@@ -319,19 +320,58 @@
   (set/union stichwortsuche
              #{[5 1] [5 2] [5 3] [5 4] [5 5] [5 6] [5 7] [5 8]}))
 
-(def flavour-list
-  {"stichwortsuche" stichwortsuche
-   "case-sensitive-stichwortsuche" case-sensitive-stickwortsuche
-   "phrasensuche" phrasensuche
-   "no-insertions-or-deletions" no-insertions-or-deletions
-   "kein flavour" (constantly true)})
+(defn strip-first-and-last-lines [errors gt ocr]
+  (let [lines (.split gt "\n")
+        end-of-first-line (count (first lines))
+        start-of-last-line (- (count gt) (count (last lines)))]
+    (prn end-of-first-line start-of-last-line)
+    (filter (fn [[code [gt _] & rest]]
+              (> start-of-last-line gt end-of-first-line)) errors)))
 
-(defn generate-statistics
-  ([base-directory] (generate-statistics base-directory identity))
-  ([base-directory flavour]
+
+(defn strip-start-and-end-errors [errors gt ocr]
+  (let [starting (take-while #(some (fn [[code [_ ocr] & rest]]
+                                      (= % ocr)) errors) (range))
+        ending (take-while #(some (fn [[code [_ ocr] & rest]]
+                                    (= % ocr)) errors)
+                           (range (dec (count ocr)) 0 -1))
+        starting (or (last starting) 0)
+        ending (or (last ending) (count ocr))]
+    (prn starting ending)
+    (filter (fn [[code [_ ocr] & rest]]
+              (> ending ocr starting)) errors)))
+
+(defn strip-newline-errors [errors gt ocr]
+  (remove (fn [error]
+            (->> error
+                 (augment-error-code gt ocr)
+                 second
+                 (some #(.contains %1 "\n")))) errors))
+
+
+(def flavour-list
+  {"stichwortsuche" [[strip-newline-errors strip-start-and-end-errors]
+                     stichwortsuche]
+   "case-sensitive-stichwortsuche" [[strip-newline-errors strip-start-and-end-errors] case-sensitive-stickwortsuche]
+   "phrasensuche" [[strip-newline-errors strip-start-and-end-errors] phrasensuche]
+   "alle Fehler" [[strip-newline-errors strip-start-and-end-errors]
+                   (constantly true)]})
+
+(defn run-filters [filters errors ground-truth ocr-results]
+  (reduce (fn [errors filter]
+            (filter errors ground-truth ocr-results))
+          errors filters))
+
+(defn generate-statistics ;;setze vereinbarte standartwerte
+  ([base-directory] (generate-statistics base-directory [] identity))
+  ([base-directory flavour] (generate-statistics base-directory [] flavour))
+  ([base-directory filters flavour]
      (let [ground-truth (map slurp (get-files-sorted (file base-directory "ground-truth/")))
            ocr-res (map slurp (get-files-sorted (file base-directory "ocr-results/")))
            edits (map (comp read-string slurp)  (get-files-sorted (file base-directory "edits/")))
+           edits (map (partial run-filters filters)
+                      edits ground-truth ocr-res)
+           _ (prn (first edits))
            errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
                        (mapcat error-code-to-matrix-entries)
                        (filter flavour))
@@ -346,8 +386,39 @@
                  [d (into {}
                           (for [[n f] flavour-list]
                             (do (prn "gen-statistics d n" d n)
-                                [n (generate-statistics d f)])))]))))
+                                [n (apply generate-statistics d f)])))]))))
 
+
+(defn correction-statistic [gt ocr-unverbessert ocr-verbessert error-codes-unverbessert error-codes-verbessert]
+  ;;todo wenn korrektur zeichen löscht oder einfügt dann ist difference hier nicht mehr korrekt
+  ;;es müsste dann gefiltert werden wobei die position im ground truth als kennzeichnung dient
+  (let [false-positives (set/difference (into #{} error-codes-verbessert) (into #{} error-codes-unverbessert))
+        false-negatives (set/difference  (into #{} error-codes-verbessert) false-positives)
+        true-positives (set/difference (into #{} error-codes-unverbessert) (into #{} error-codes-verbessert))]
+    {:false-positives (map (partial augment-error-code gt ocr-verbessert) false-positives)
+     :false-negatives (map (partial augment-error-code gt ocr-verbessert) false-negatives)
+     :true-positives (map (partial augment-error-code gt ocr-unverbessert) true-positives )}))
+
+(defn run-filters [filters errors ground-truth ocr-results]
+  (reduce (fn [errors filter]
+            (filter errors ground-truth ocr-results))
+          errors filters))
+
+(defn generate-correction-statistics
+  ([base-directory-unverbessert base-directory-verbessert]
+     (generate-correction-statistics base-directory-unverbessert base-directory-verbessert [strip-newline-errors strip-start-and-end-errors]))
+  ([base-directory-unverbessert base-directory-verbessert filters] 
+     (let [gts (get-files-sorted (file base-directory-unverbessert "ground-truth/"))
+           gt-text (map slurp gts)
+           ocr-res-unverb (map slurp (get-files-sorted (file base-directory-unverbessert "ocr-results/")))
+           ocr-res-verb (map slurp (get-files-sorted (file base-directory-verbessert "ocr-results/")))
+           error-codes-verb (map (comp read-string slurp) (get-files-sorted (file base-directory-verbessert "edits/")))
+           error-codes-unverb (map (comp read-string slurp) (get-files-sorted (file base-directory-unverbessert "edits/")))
+           error-codes-verb (map (partial run-filters filters) error-codes-verb gt-text ocr-res-verb)
+           error-codes-unverb (map (partial run-filters filters) error-codes-unverb gt-text ocr-res-unverb)]
+       (pmap (fn [gt ocr-unverb ocr-verb ec-verb ec-unverb page]
+               (assoc (correction-statistic gt ocr-unverb ocr-verb ec-unverb ec-verb) :pages [page]))
+             gt-text ocr-res-unverb ocr-res-verb error-codes-verb error-codes-unverb (map (memfn getName) gts)))))
 
 
 (edits "a" "b")
