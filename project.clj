@@ -10,6 +10,5 @@
                  [gorilla-renderable "1.0.0"]
                  [de.undeadco/marmoset "0.1.0-SNAPSHOT"]
                  [om "0.7.1"]
-                 [domina "1.0.2"]
-                 [prismatic/dommy "0.1.3"]]
+                 [domina "1.0.2"]]
   :plugins [[lein-gorilla "0.3.4-SNAPSHOT"]])
