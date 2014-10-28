@@ -214,33 +214,6 @@
    extract-insertion-errors
    extract-deletion-errors])
 
-(use 'clojure.java.io)
-(defn get-files-sorted [dir]
-  (->> (file-seq (file dir))
-       rest
-       (sort-by #(.getName  %))))
-#_(file-locations for now... "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/" "/home/kima/programming/ocr-visualizer/resources/public/edits," "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")
-
-(defn deploy-to-ocr-visualizer []
-  (let [gts (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/")
-        ocr-res (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")]
-    (doall (pmap (fn [gt ocr]
-                   (let [filename (str "/home/kima/programming/ocr-visualizer/resources/public/edits/" (.getName gt))]
-                     (dprintln "error-counts for " filename)
-                     (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
-                 gts ocr-res))))
-
-
-(defn deploy-error-codes [base-directory]
-  (let [gts (get-files-sorted (file base-directory "ground-truth/"))
-        ocr-res (get-files-sorted (file base-directory "ocr-results/"))]
-    (doall (pmap (fn [gt ocr]
-                   (let [filename (file base-directory
-                                        "edits/" (.getName gt))]
-                     (dprintln "error-counts for " filename)
-                     (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
-                 gts ocr-res))))
-
 (defn word-count [text]
   (as-> text x
         (.split x "\\s*")
@@ -348,31 +321,16 @@
           errors filters))
 
 (defn generate-statistics ;;setze vereinbarte standartwerte
-  ([base-directory] (generate-statistics base-directory [] identity))
-  ([base-directory flavour] (generate-statistics base-directory [] flavour))
-  ([base-directory filters flavour]
-     (let [ground-truth (map slurp (get-files-sorted (file base-directory "ground-truth/")))
-           ocr-res (map slurp (get-files-sorted (file base-directory "ocr-results/")))
-           edits (map (comp read-string slurp)  (get-files-sorted (file base-directory "edits/")))
-           edits (map (partial run-filters filters)
-                      edits ground-truth ocr-res)
-           _ (dprintln (first edits))
-           errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
+  ([ground-truth ocr-res edits] (generate-statistics ground-truth ocr-res edits identity))
+  ([ground-truth ocr-res edits flavour]
+     (dprintln (first edits))
+     (let [errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
                        (mapcat error-code-to-matrix-entries)
                        (filter flavour))
            charc (apply + (map count ocr-res))]
        {:error-rate (double (* 100 (/ (count errors) charc)))
         :charc charc :error-number (count errors)
         :by-category (frequencies errors)})))
-
-(defn gen-statistics-for-base-directories [bd]
-  (into {} (for [d bd]
-             (do (dprintln "for base directory " d)
-                 [d (into {}
-                          (for [[n f] flavour-list]
-                            (do (dprintln "gen-statistics d n" d n)
-                                [n (apply generate-statistics d f)])))]))))
-
 
 (defn correction-statistic [gt ocr-unverbessert ocr-verbessert error-codes-unverbessert error-codes-verbessert]
   ;;todo wenn korrektur zeichen löscht oder einfügt dann ist difference hier nicht mehr korrekt
@@ -383,27 +341,3 @@
     {:false-positives (map (partial augment-error-code gt ocr-verbessert) false-positives)
      :false-negatives (map (partial augment-error-code gt ocr-verbessert) false-negatives)
      :true-positives (map (partial augment-error-code gt ocr-unverbessert) true-positives )}))
-
-(defn run-filters [filters errors ground-truth ocr-results]
-  (reduce (fn [errors filter]
-            (filter errors ground-truth ocr-results))
-          errors filters))
-
-(defn generate-correction-statistics
-  ([base-directory-unverbessert base-directory-verbessert]
-     (generate-correction-statistics base-directory-unverbessert base-directory-verbessert [strip-newline-errors strip-start-and-end-errors]))
-  ([base-directory-unverbessert base-directory-verbessert filters]
-     (let [gts (get-files-sorted (file base-directory-unverbessert "ground-truth/"))
-           gt-text (map slurp gts)
-           ocr-res-unverb (map slurp (get-files-sorted (file base-directory-unverbessert "ocr-results/")))
-           ocr-res-verb (map slurp (get-files-sorted (file base-directory-verbessert "ocr-results/")))
-           error-codes-verb (map (comp read-string slurp) (get-files-sorted (file base-directory-verbessert "edits/")))
-           error-codes-unverb (map (comp read-string slurp) (get-files-sorted (file base-directory-unverbessert "edits/")))
-           error-codes-verb (map (partial run-filters filters) error-codes-verb gt-text ocr-res-verb)
-           error-codes-unverb (map (partial run-filters filters) error-codes-unverb gt-text ocr-res-unverb)]
-       (pmap (fn [gt ocr-unverb ocr-verb ec-verb ec-unverb page]
-               (assoc (correction-statistic gt ocr-unverb ocr-verb ec-unverb ec-verb) :pages [page]))
-             gt-text ocr-res-unverb ocr-res-verb error-codes-verb error-codes-unverb (map (memfn getName) gts)))))
-
-
-(edits "a" "b")
