@@ -35,19 +35,19 @@
   padding-bottom: 40px;
   }
   .wrap {
-  width:1000px;
+  width:100%;
   margin:0 auto;
   }
   .left {
   float:left;
-  width:500px;
+  width:50%;
   }
   .right{
   float:right;
-  width:500px;
+  width:50%;
   }
   .summary-div{
-  width:1000px;
+  width:100%;
   display:block;
   }
   .boxed {
@@ -58,7 +58,7 @@
   border:1px solid black;
   }
   table-div{
-  width:1000px;
+  width:100%;
   }
   table td{
   border:1px solid black;
