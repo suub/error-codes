@@ -278,31 +278,31 @@
   (set/union stichwortsuche
              #{[5 1] [5 2] [5 3] [5 4] [5 5] [5 6] [5 7] [5 8]}))
 
-(defn strip-first-and-last-lines [errors gt ocr]
-  (let [lines (.split gt "\n")
+(defn strip-first-and-last-lines [errors truth raw]
+  (let [lines (.split truth "\n")
         end-of-first-line (count (first lines))
         start-of-last-line (- (count gt) (count (last lines)))]
     (dprintln end-of-first-line start-of-last-line)
-    (filter (fn [[code [gt _] & rest]]
-              (> start-of-last-line gt end-of-first-line)) errors)))
+    (filter (fn [[code [truth _] & rest]]
+              (> start-of-last-line truth end-of-first-line)) errors)))
 
 
-(defn strip-start-and-end-errors [errors gt ocr]
-  (let [starting (take-while #(some (fn [[code [_ ocr] & rest]]
-                                      (= % ocr)) errors) (range))
-        ending (take-while #(some (fn [[code [_ ocr] & rest]]
-                                    (= % ocr)) errors)
-                           (range (dec (count ocr)) 0 -1))
+(defn strip-start-and-end-errors [errors truth raw]
+  (let [starting (take-while #(some (fn [[code [_ raw] & rest]]
+                                      (= % raw)) errors) (range))
+        ending (take-while #(some (fn [[code [_ raw] & rest]]
+                                    (= % raw)) errors)
+                           (range (dec (count raw)) 0 -1))
         starting (or (last starting) 0)
-        ending (or (last ending) (count ocr))]
+        ending (or (last ending) (count raw))]
     (dprintln starting ending)
-    (filter (fn [[code [_ ocr] & rest]]
-              (> ending ocr starting)) errors)))
+    (filter (fn [[code [_ raw] & rest]]
+              (> ending raw starting)) errors)))
 
-(defn strip-newline-errors [errors gt ocr]
+(defn strip-newline-errors [errors truth raw]
   (remove (fn [error]
             (->> error
-                 (augment-error-code gt ocr)
+                 (augment-error-code truth raw)
                  second
                  (some #(.contains %1 "\n")))) errors))
 
@@ -315,29 +315,30 @@
    "alle Fehler" [[strip-newline-errors strip-start-and-end-errors]
                    (constantly true)]})
 
-(defn run-filters [filters errors ground-truth ocr-results]
+(defn run-filters [filters errors ground-truth raw-results]
   (reduce (fn [errors filter]
-            (filter errors ground-truth ocr-results))
+            (filter errors ground-truth raw-results))
           errors filters))
 
 (defn generate-statistics ;;setze vereinbarte standartwerte
-  ([ground-truth ocr-res edits] (generate-statistics ground-truth ocr-res edits identity))
-  ([ground-truth ocr-res edits flavour]
-     (dprintln (first edits))
-     (let [errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
+  ([pages edit-sel] (generate-statistics pages edit-sel identity))
+  ([pages edit-sel flavour]
+     (let [errors (->> (mapcat (fn [:keys [truth raw edits]]
+       (map (partial augment-error-code truth raw) edit-sel edits)) pages)
                        (mapcat error-code-to-matrix-entries)
                        (filter flavour))
-           charc (apply + (map count ocr-res))]
+           charc (count (mapcat :raw pages)]
        {:error-rate (double (* 100 (/ (count errors) charc)))
         :charc charc :error-number (count errors)
         :by-category (frequencies errors)})))
 
-(defn correction-statistic [gt ocr-unverbessert ocr-verbessert error-codes-unverbessert error-codes-verbessert]
+(defn correction-statistic [{:keys [truth raw corrected edits]}]
   ;;todo wenn korrektur zeichen löscht oder einfügt dann ist difference hier nicht mehr korrekt
   ;;es müsste dann gefiltert werden wobei die position im ground truth als kennzeichnung dient
-  (let [false-positives (set/difference (into #{} error-codes-verbessert) (into #{} error-codes-unverbessert))
-        false-negatives (set/difference  (into #{} error-codes-verbessert) false-positives)
-        true-positives (set/difference (into #{} error-codes-unverbessert) (into #{} error-codes-verbessert))]
-    {:false-positives (map (partial augment-error-code gt ocr-verbessert) false-positives)
-     :false-negatives (map (partial augment-error-code gt ocr-verbessert) false-negatives)
-     :true-positives (map (partial augment-error-code gt ocr-unverbessert) true-positives )}))
+  (let [{:keys [truth-raw truth-corrected] edits}
+        false-positives (set/difference (into #{} truth-corrected) (into #{} truth-raw))
+        false-negatives (set/difference  (into #{} truth-corrected) false-positives)
+        true-positives (set/difference (into #{} truth-raw) (into #{} truth-corrected))]
+    {:false-positives (map (partial augment-error-code truth corrected) false-positives)
+     :false-negatives (map (partial augment-error-code truth corrected) false-negatives)
+     :true-positives (map (partial augment-error-code truth raw) true-positives )}))
