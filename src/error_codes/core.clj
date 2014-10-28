@@ -4,6 +4,11 @@
   (:use [clojure.core.matrix]))
 
 (set! *warn-on-reflection* true)
+(def ^:dynamic *DEBUG* false)
+
+(defn dprintln [& args]
+  (when *DEBUG*
+    (println args)))
 
 (defn lev [str1 str2]
   (let [mat (new-matrix :ndarray (inc (count str1)) (inc (count str2)))]
@@ -129,13 +134,13 @@
   (let [res (let [bar-count (lookup-bar (case type
                                 :one-to-many (nth t1 a)
                                 :many-to-one (nth t2 b)))
-                  _ (prn "bar-count " bar-count (nth t1 a))]
+                  _ (dprintln "bar-count " bar-count (nth t1 a))]
     (loop [[[ia ib] & is] insdel acc 0 ret []]
       (if ia
         (let [bc (lookup-bar (case type
                                :one-to-many (nth t2 ib)
                                :many-to-one (nth t1 ia)))
-#_#_              _ (prn "bc " bc (nth t2 ib)
+#_#_              _ (dprintln "bc " bc (nth t2 ib)
                      "acc " acc " ret " ret
                      (>= (+ acc bc) bar-count)
                      "ia ib " ia ib)]
@@ -143,20 +148,20 @@
             (conj ret [ia ib])
             (recur is (+ acc bc) (conj ret [ia ib]))))
         ret)))]
-     (prn "take-bars " res)
+     (dprintln "take-bars " res)
      res))
   ;;;todo take care of how many are allowed to be extracted
   ;;;we know that count-free is > 0 at the beginning
   ;;;be careful at the start of the error
 (defn- extract [t1 t2 fl type]
   (for [[fs insdel] fl]
-    (let [_ (prn "fs " fs "insdel " insdel "count-free" (- (count insdel) (count fs)))
+    (let [_ (dprintln "fs " fs "insdel " insdel "count-free" (- (count insdel) (count fs)))
           count-freepp (- (count insdel) (count fs))]
       (loop [[[a b] & ss :as aktfs] fs extr [] insdel insdel
              count-free (- (count insdel) (count fs))]
         (if (and a (seq insdel))
           (let [ext (take-bars t1 t2 [a b] (take (inc count-free) insdel) type)
-                _ (prn "ext-after-take-bars " [a b]  ext "insdel-for-ext " insdel "count-free " count-free)]
+                _ (dprintln "ext-after-take-bars " [a b]  ext "insdel-for-ext " insdel "count-free " count-free)]
             (recur ;dont drop here
              ss
              (conj extr [[a b] ext])
@@ -183,11 +188,11 @@
 (defn extract-count-changing-errors [type edits t1 t2]
   (let [{:keys [substitutions insertions deletions]} edits
         fs (extract-following-substitutions substitutions)
-        _ (prn "fs " fs)
+        _ (dprintln "fs " fs)
         fi (add-following fs (case type :one-to-many insertions :many-to-one deletions) type)
-        _ (prn "fi " fi)
+        _ (dprintln "fi " fi)
         ext (apply concat (extract t1 t2 fi type))
-        _ (prn "ext " ext)
+        _ (dprintln "ext " ext)
         nedits (delete-from-edits edits (partition 2 (flatten ext)))
         res
         [(for [[[a b] e] ext]
@@ -199,7 +204,7 @@
                              [a (second (first e))] [(inc a) (second (last e))]]
                :many-to-one [[7 (to-code-number (nth t2 b))]
                              [(first (first e)) b] [(first (last e)) (inc b)]]))) nedits]
-        _ (prn "extr " ext "res" (first res))]
+        _ (dprintln "extr " ext "res" (first res))]
     res))
 
 (def extraction-list
@@ -221,7 +226,7 @@
         ocr-res (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")]
     (doall (pmap (fn [gt ocr]
                    (let [filename (str "/home/kima/programming/ocr-visualizer/resources/public/edits/" (.getName gt))]
-                     (prn "error-counts for " filename)
+                     (dprintln "error-counts for " filename)
                      (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
                  gts ocr-res))))
 
@@ -232,7 +237,7 @@
     (doall (pmap (fn [gt ocr]
                    (let [filename (file base-directory
                                         "edits/" (.getName gt))]
-                     (prn "error-counts for " filename)
+                     (dprintln "error-counts for " filename)
                      (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
                  gts ocr-res))))
 
@@ -253,7 +258,7 @@
 
 (defn deploy-base-direcories []
   (doseq [bd base-directories]
-    (prn "<<<<<<<<<<<<<<<<<now " bd ">>>>>>>>>>>>>>>>>>")
+    (dprintln "<<<<<<<<<<<<<<<<<now " bd ">>>>>>>>>>>>>>>>>>")
     (deploy-error-codes bd)))
 
 (defn word-count [text]
@@ -324,7 +329,7 @@
   (let [lines (.split gt "\n")
         end-of-first-line (count (first lines))
         start-of-last-line (- (count gt) (count (last lines)))]
-    (prn end-of-first-line start-of-last-line)
+    (dprintln end-of-first-line start-of-last-line)
     (filter (fn [[code [gt _] & rest]]
               (> start-of-last-line gt end-of-first-line)) errors)))
 
@@ -337,7 +342,7 @@
                            (range (dec (count ocr)) 0 -1))
         starting (or (last starting) 0)
         ending (or (last ending) (count ocr))]
-    (prn starting ending)
+    (dprintln starting ending)
     (filter (fn [[code [_ ocr] & rest]]
               (> ending ocr starting)) errors)))
 
@@ -371,7 +376,7 @@
            edits (map (comp read-string slurp)  (get-files-sorted (file base-directory "edits/")))
            edits (map (partial run-filters filters)
                       edits ground-truth ocr-res)
-           _ (prn (first edits))
+           _ (dprintln (first edits))
            errors (->> (mapcat #(map (partial augment-error-code %1 %2) %3) ground-truth ocr-res edits)
                        (mapcat error-code-to-matrix-entries)
                        (filter flavour))
@@ -382,10 +387,10 @@
 
 (defn gen-statistics-for-base-directories [bd]
   (into {} (for [d bd]
-             (do (prn "for base directory " d)
+             (do (dprintln "for base directory " d)
                  [d (into {}
                           (for [[n f] flavour-list]
-                            (do (prn "gen-statistics d n" d n)
+                            (do (dprintln "gen-statistics d n" d n)
                                 [n (apply generate-statistics d f)])))]))))
 
 
