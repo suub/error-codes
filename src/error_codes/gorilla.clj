@@ -2,7 +2,7 @@
 
 ;; **
 ;;; # Gorilla visualisations for error codes.
-;;; 
+;;;
 ;;; Inline views for error codes are a huge help when correcting pages and viewing the changes made by correction algorithms.
 ;; **
 
@@ -17,7 +17,8 @@
 ;; <=
 
 ;; @@
-(m/defsegment diff-view
+
+(m/defsegment diff-segment
               {:preamble ["react.js"]
                :optimizations :advanced
                :pretty-print false
@@ -27,6 +28,46 @@
               [om.core :as om :include-macros true]
               [error-codes.visualizer :as v]))
   (enable-console-print!)
+  (def error-css
+  "
+  body {
+  padding-top: 60px;
+  padding-bottom: 40px;
+  }
+  .wrap {
+  width:1000px;
+  margin:0 auto;
+  }
+  .left {
+  float:left;
+  width:500px;
+  }
+  .right{
+  float:right;
+  width:500px;
+  }
+  .summary-div{
+  width:1000px;
+  display:block;
+  }
+  .boxed {
+   border:solid black 1px;
+  }
+  table{
+  border-collapse:collapse;
+  border:1px solid black;
+  }
+  table-div{
+  width:1000px;
+  }
+  table td{
+  border:1px solid black;
+  }
+  ")
+  (let [css (.createElement js/document "style")]
+       (aset css "type" "text/css")
+       (aset css "innerHTML" error-css)
+       (.appendChild (.item (.getElementsByTagName js/document "head") 0) css))
   (defn main []
     (marmoset.client/autoheight)
     (om/root v/page-view
@@ -46,7 +87,7 @@
                 env  {:left left
                       :right right
                       :error-codes error-codes}
-                html (diff-view id env)]
+                html (diff-segment id env)]
             {:type :html
              :value (pr-str self)
              :content html})))
