@@ -34,7 +34,7 @@
 (defn make-highlight [error type a b]
   (let [positionlr (get-position type error)
         textlr (mapv get-text positionlr [a b])
-        color (get {:substitution "#00FFFF" :insertion "green" :deletion "red"
+        color (get {:substitution "blue" :insertion "green" :deletion "red"
                     :one-to-many "yellow" :many-to-one "orange"} type)]
     (mapv (fn [pos text lr]
             {:type type
