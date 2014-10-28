@@ -209,53 +209,6 @@
    extract-insertion-errors
    extract-deletion-errors])
 
-(use 'clojure.java.io)
-(defn get-files-sorted [dir]
-  (->> (file-seq (file dir))
-       rest
-       (sort-by #(.getName  %))))
-#_(file-locations for now... "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/" "/home/kima/programming/ocr-visualizer/resources/public/edits," "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")
-
-(defn deploy-to-ocr-visualizer []
-  (let [gts (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ground-truth/")
-        ocr-res (get-files-sorted "/home/kima/programming/ocr-visualizer/resources/public/ocr-results/")]
-    (doall (pmap (fn [gt ocr]
-                   (let [filename (str "/home/kima/programming/ocr-visualizer/resources/public/edits/" (.getName gt))]
-                     (prn "error-counts for " filename)
-                     (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
-                 gts ocr-res))))
-
-
-(defn deploy-error-codes [base-directory]
-  (let [gts (get-files-sorted (file base-directory "ground-truth/"))
-        ocr-res (get-files-sorted (file base-directory "ocr-results/"))]
-    (doall (pmap (fn [gt ocr]
-                   (let [filename (file base-directory
-                                        "edits/" (.getName gt))]
-                     (prn "error-counts for " filename)
-                     (spit filename (pr-str (error-codes (slurp gt) (slurp ocr))))))
-                 gts ocr-res))))
-
-(def base-directories
-  ["/home/kima/programming/grenzbote-files/grenzbote/abby"
-   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_mit-woerterbuch"
-   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_mit-woerterbuch_2014-07-16"
-   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_ohne-woerterbuch"
-   "/home/kima/programming/grenzbote-files/grenzbote/recognition-server_output_ohne-woerterbuch_2014-07-16"
-   "/home/kima/programming/grenzbote-files/grenzbote/tesseract_trainiert_gem"
-   "/home/kima/programming/grenzbote-files/grenzbote/tesseract_untrainiert"
-   "/home/kima/programming/grenzbote-files/grenzbote/Wikisource-erster-Band"
-   "/home/kima/programming/grenzbote-files/grenzbote/Wikisource-erster-Band_2014-07-16"
-   "/home/kima/programming/grenzbote-files/grenzbote/statistic-test"
-   "/home/kima/programming/grenzbote-files/grenzbote/new-test"
-   "/home/kima/programming/grenzbote-files/grenzbote/abby_verbessert"
-   ])
-
-(defn deploy-base-direcories []
-  (doseq [bd base-directories]
-    (prn "<<<<<<<<<<<<<<<<<now " bd ">>>>>>>>>>>>>>>>>>")
-    (deploy-error-codes bd)))
-
 (defn word-count [text]
   (as-> text x
         (.split x "\\s*")
@@ -407,7 +360,7 @@
 (defn generate-correction-statistics
   ([base-directory-unverbessert base-directory-verbessert]
      (generate-correction-statistics base-directory-unverbessert base-directory-verbessert [strip-newline-errors strip-start-and-end-errors]))
-  ([base-directory-unverbessert base-directory-verbessert filters] 
+  ([base-directory-unverbessert base-directory-verbessert filters]
      (let [gts (get-files-sorted (file base-directory-unverbessert "ground-truth/"))
            gt-text (map slurp gts)
            ocr-res-unverb (map slurp (get-files-sorted (file base-directory-unverbessert "ocr-results/")))
