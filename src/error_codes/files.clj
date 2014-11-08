@@ -1,5 +1,6 @@
 (ns error-codes.files
-  (:require [clojure.java.io :refer [file]]
+  (:require [clojure.java.io :as io :refer [file]]
+            [clojure.core.reducers :as r]
             [clojure.set :as set])
   (:use [clojure.core.matrix]))
 
@@ -414,7 +415,7 @@
      (generate-correction-statistics base-directory-unverbessert base-directory-verbessert [strip-newline-errors strip-start-and-end-errors]))
   ([base-directory-unverbessert base-directory-verbessert filters] 
      (let [gts (get-files-sorted (file base-directory-unverbessert "ground-truth/"))
-           gt-text (map lurp gts)
+           gt-text (map slurp gts)
            ocr-res-unverb (map slurp (get-files-sorted (file base-directory-unverbessert "ocr-results/")))
            ocr-res-verb (map slurp (get-files-sorted (file base-directory-verbessert "ocr-results/")))
            error-codes-verb (map (comp read-string slurp) (get-files-sorted (file base-directory-verbessert "edits/")))
@@ -427,3 +428,61 @@
 
 
 (edits "a" "b")
+
+(defn read-dict [path]
+  (with-open [in (io/reader path)]
+    (let [words (->> (line-seq in)
+                     (r/map #(clojure.string/split % #"\s+"))
+                     (r/map (fn [[cnt orig simpl]] [orig (bigint cnt)])))
+          word-count (r/fold + (r/map second words))]
+      (->> words
+           (r/map (fn [[w c]] [w (/ c word-count)]))
+           (into {})))))
+
+(def dict (read-dict "/home/kima/programming/bote/resources/dta-freq.d/dta-core-1850+.fuw"))
+
+(defn word-at [idx s]
+  ;;(prn "hi")
+  (let [start (or (first (drop-while #(Character/isLetter (nth s %)) (range idx -1 -1))) -1)
+        end  (or (first (drop-while #(Character/isLetter (nth s %)) (range idx (count s)))) (count s))]
+  ;;  (prn start end)
+    (.substring ^String s (inc start) end)))
+
+(defn error-words [gt ocr edits]
+  ;;(prn "error-words " (first edits))
+  (distinct (doall (for [[code [a b] :as ec] edits
+                         :when (and (<= 0 a (dec (count gt)))
+                                    (<= 0 b (dec (count ocr))))
+                         :when (and (Character/isLetter (nth gt a))
+                                    (Character/isLetter (nth ocr b)))
+                         :let [gt-word (word-at a gt)
+                               ocr-word (word-at b ocr)]]
+                     {:gt-word gt-word
+                      :ocr-word ocr-word}))))
+(defn correction-potential [base-directory]
+  (let [gt (map slurp (get-files-sorted (file base-directory "ground-truth")))
+        ocr (map slurp (get-files-sorted (file base-directory "ocr-results")))
+        edits (map (comp read-string slurp) (get-files-sorted (file base-directory "edits")))
+        error-words (mapcat error-words gt ocr edits)]
+    ;(prn "hi " (type error-words))
+    (for [ew error-words]
+      (do ;(prn "ew " ew)
+          (assoc ew :ocr-in-dict? (dict (:ocr-word ew))
+                 :gt-in-dict? (dict (:gt-word ew)))))))
+
+;;687 mit 1850+ count ocr-in-dict?
+;;2431          count gt-in-dict?
+
+;;für core
+;;836
+;;2541
+
+;;für full
+;;984
+;;2648
+
+;;neue wortrennung wieder mit 1850
+;;760
+;;2914
+
+;;wörter im gt die nicht im 1850 dict stehen
