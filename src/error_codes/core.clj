@@ -281,7 +281,7 @@
 (defn strip-first-and-last-lines [errors truth raw]
   (let [lines (.split truth "\n")
         end-of-first-line (count (first lines))
-        start-of-last-line (- (count gt) (count (last lines)))]
+        start-of-last-line (- (count truth) (count (last lines)))]
     (dprintln end-of-first-line start-of-last-line)
     (filter (fn [[code [truth _] & rest]]
               (> start-of-last-line truth end-of-first-line)) errors)))
