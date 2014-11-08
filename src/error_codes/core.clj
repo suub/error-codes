@@ -327,7 +327,7 @@
        (map (partial augment-error-code truth raw) edit-sel edits)) pages)
                        (mapcat error-code-to-matrix-entries)
                        (filter flavour))
-           charc (count (mapcat :raw pages)]
+           charc (count (mapcat :raw pages))]
        {:error-rate (double (* 100 (/ (count errors) charc)))
         :charc charc :error-number (count errors)
         :by-category (frequencies errors)})))
