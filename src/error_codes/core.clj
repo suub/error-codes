@@ -1,14 +1,11 @@
 (ns error-codes.core
   (:require [clojure.java.io :refer [file]]
-            [clojure.set :as set])
+            [clojure.set :as set]
+            [taoensso.timbre :refer [debug]])
   (:use [clojure.core.matrix]))
 
 (set! *warn-on-reflection* true)
 (def ^:dynamic *DEBUG* false)
-
-(defn dprintln [& args]
-  (when *DEBUG*
-    (println args)))
 
 (defn lev [str1 str2]
   (let [mat (new-matrix :ndarray (inc (count str1)) (inc (count str2)))]
@@ -134,13 +131,13 @@
   (let [res (let [bar-count (lookup-bar (case type
                                 :one-to-many (nth t1 a)
                                 :many-to-one (nth t2 b)))
-                  _ (dprintln "bar-count " bar-count (nth t1 a))]
+                  _ (debug "bar-count " bar-count (nth t1 a))]
     (loop [[[ia ib] & is] insdel acc 0 ret []]
       (if ia
         (let [bc (lookup-bar (case type
                                :one-to-many (nth t2 ib)
                                :many-to-one (nth t1 ia)))
-#_#_              _ (dprintln "bc " bc (nth t2 ib)
+#_#_              _ (debug "bc " bc (nth t2 ib)
                      "acc " acc " ret " ret
                      (>= (+ acc bc) bar-count)
                      "ia ib " ia ib)]
@@ -148,20 +145,20 @@
             (conj ret [ia ib])
             (recur is (+ acc bc) (conj ret [ia ib]))))
         ret)))]
-     (dprintln "take-bars " res)
+     (debug "take-bars " res)
      res))
   ;;;todo take care of how many are allowed to be extracted
   ;;;we know that count-free is > 0 at the beginning
   ;;;be careful at the start of the error
 (defn- extract [t1 t2 fl type]
   (for [[fs insdel] fl]
-    (let [_ (dprintln "fs " fs "insdel " insdel "count-free" (- (count insdel) (count fs)))
+    (let [_ (debug "fs " fs "insdel " insdel "count-free" (- (count insdel) (count fs)))
           count-freepp (- (count insdel) (count fs))]
       (loop [[[a b] & ss :as aktfs] fs extr [] insdel insdel
              count-free (- (count insdel) (count fs))]
         (if (and a (seq insdel))
           (let [ext (take-bars t1 t2 [a b] (take (inc count-free) insdel) type)
-                _ (dprintln "ext-after-take-bars " [a b]  ext "insdel-for-ext " insdel "count-free " count-free)]
+                _ (debug "ext-after-take-bars " [a b]  ext "insdel-for-ext " insdel "count-free " count-free)]
             (recur ;dont drop here
              ss
              (conj extr [[a b] ext])
@@ -188,11 +185,11 @@
 (defn extract-count-changing-errors [type edits t1 t2]
   (let [{:keys [substitutions insertions deletions]} edits
         fs (extract-following-substitutions substitutions)
-        _ (dprintln "fs " fs)
+        _ (debug "fs " fs)
         fi (add-following fs (case type :one-to-many insertions :many-to-one deletions) type)
-        _ (dprintln "fi " fi)
+        _ (debug "fi " fi)
         ext (apply concat (extract t1 t2 fi type))
-        _ (dprintln "ext " ext)
+        _ (debug "ext " ext)
         nedits (delete-from-edits edits (partition 2 (flatten ext)))
         res
         [(for [[[a b] e] ext]
@@ -204,7 +201,7 @@
                              [a (second (first e))] [(inc a) (second (last e))]]
                :many-to-one [[7 (to-code-number (nth t2 b))]
                              [(first (first e)) b] [(first (last e)) (inc b)]]))) nedits]
-        _ (dprintln "extr " ext "res" (first res))]
+        _ (debug "extr " ext "res" (first res))]
     res))
 
 (def extraction-list
@@ -282,7 +279,7 @@
   (let [lines (.split truth "\n")
         end-of-first-line (count (first lines))
         start-of-last-line (- (count truth) (count (last lines)))]
-    (dprintln end-of-first-line start-of-last-line)
+    (debug end-of-first-line start-of-last-line)
     (filter (fn [[code [truth _] & rest]]
               (> start-of-last-line truth end-of-first-line)) errors)))
 
@@ -295,7 +292,7 @@
                            (range (dec (count raw)) 0 -1))
         starting (or (last starting) 0)
         ending (or (last ending) (count raw))]
-    (dprintln starting ending)
+    (debug starting ending)
     (filter (fn [[code [_ raw] & rest]]
               (> ending raw starting)) errors)))
 
@@ -323,7 +320,7 @@
 (defn generate-statistics ;;setze vereinbarte standartwerte
   ([pages edit-sel] (generate-statistics pages edit-sel identity))
   ([pages edit-sel flavour]
-     (let [errors (->> (mapcat (fn [:keys [truth raw edits]]
+     (let [errors (->> (mapcat (fn [{:keys [truth raw edits]}]
        (map (partial augment-error-code truth raw) edit-sel edits)) pages)
                        (mapcat error-code-to-matrix-entries)
                        (filter flavour))
@@ -335,7 +332,7 @@
 (defn correction-statistic [{:keys [truth raw corrected edits]}]
   ;;todo wenn korrektur zeichen löscht oder einfügt dann ist difference hier nicht mehr korrekt
   ;;es müsste dann gefiltert werden wobei die position im ground truth als kennzeichnung dient
-  (let [{:keys [truth-raw truth-corrected] edits}
+  (let [{:keys [truth-raw truth-corrected]} edits
         false-positives (set/difference (into #{} truth-corrected) (into #{} truth-raw))
         false-negatives (set/difference  (into #{} truth-corrected) false-positives)
         true-positives (set/difference (into #{} truth-raw) (into #{} truth-corrected))]
