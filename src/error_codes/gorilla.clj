@@ -19,10 +19,10 @@
 ;; @@
 
 (m/defsegment diff-segment
-              {:preamble ["react.js"]
+              {:preamble ["marmoset/react.js"]
                :optimizations :advanced
                :pretty-print false
-               :externs ["react.js"]}
+               :externs ["marmoset/react.js"]}
   (ns error-codes.visualized
     (:require [marmoset.client :as m]
               [om.core :as om :include-macros true]
