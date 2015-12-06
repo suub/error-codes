@@ -682,5 +682,6 @@
 
 
 * Todos
-** TODO Maybe we need context aware filtering to get rid of dirt errors at the beginning
+** DONE Maybe we need context aware filtering to get rid of "dirt" errors at the beginning of pages
+   - incorporated as postprocessing step in bote/optimize 
    
