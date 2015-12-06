@@ -6,11 +6,11 @@
 #+LaTeX_CLASS: uni
 -----
 * Introduction
-  This program solves the problem of extracting semantic ocr-failures
+  This program solves the problem of extracting semantic ocr-errors
   between a two texts, one that is the ground-truth and the other is
   the performed result from the ocr.
 
-  The ocr-failure codes are given by the following matrix:
+  The ocr-error codes are given by the following matrix:
   |   | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 |
   | 1 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 | 6 |
   | 2 | 1 | 1 | 1 | 1 | 1 | 7 | 2 | 5 |   |
